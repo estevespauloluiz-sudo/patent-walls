@@ -1,0 +1,2396 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>The Patent Walls — How Intellectual Property Shapes the Green Industrial Race</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://unpkg.com/topojson-client@3"></script>
+<script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+<script src="https://unpkg.com/scrollama@2.2.1/build/scrollama.min.js"></script>
+<style>
+:root{
+  --bg-0:#0B0F14;
+  --bg-1:#11161D;
+  --bg-2:#1A2230;
+  --bg-3:#222C3D;
+  --ink:#F1E8D9;
+  --ink-dim:#A9B3C2;
+  --ink-mute:#8595A7;        /* WCAG AA ≥ 4.5:1 on bg-0 */
+  --accent:#E94E3B;          /* signal red */
+  --accent-2:#F0B429;        /* signal amber */
+  --green-1:#39B383;
+  --blue-1:#6CB6FF;
+  --rule:rgba(241,232,217,.16);
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'Inter',-apple-system,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto;}
+  *,*::before,*::after{animation-duration:.001s !important;animation-iteration-count:1 !important;transition-duration:.001s !important;}
+}
+html,body{margin:0;padding:0;background:var(--bg-0);color:var(--ink);font-family:var(--sans);font-weight:400;line-height:1.55;-webkit-font-smoothing:antialiased;}
+img{max-width:100%;display:block;}
+a{color:inherit;}
+
+/* Skip-to-content link (WCAG 2.2 2.4.1) */
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--accent-2);color:#0B0F14;padding:10px 14px;font-weight:700;font-size:13px;letter-spacing:.06em;z-index:1000;text-decoration:none;border-radius:0 0 4px 0;}
+.skip-link:focus{left:0;outline:2px solid var(--ink);outline-offset:2px;}
+
+/* Visible focus (WCAG 2.2 2.4.7) */
+:focus-visible{outline:2px solid var(--accent-2);outline-offset:3px;border-radius:2px;}
+
+/* Screen-reader-only utility */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+
+/* Figure / figcaption styling for chart attribution */
+figure{margin:0;padding:0;}
+figcaption{margin-top:18px;font-size:11.5px;color:var(--ink-mute);line-height:1.5;letter-spacing:.02em;max-width:700px;}
+figcaption b{color:var(--ink-dim);font-weight:700;}
+
+/* Print stylesheet */
+@media print{
+  body{background:#fff;color:#000;}
+  .topnav,.progress-bar,.scroll-cue,.hero-art,.sec-divider,.map-tooltip,.ref-tooltip,.gis-controls{display:none !important;}
+  .scrolly{display:block;}
+  .scrolly .sticky-graphic{position:static;height:auto;border:0;padding:0;}
+  .scrolly .step{opacity:1 !important;page-break-inside:avoid;}
+  .hero,.prologue,.coda{background:#fff !important;color:#000 !important;page-break-after:always;}
+  h1,h2,h3{color:#000 !important;}
+}
+
+/* ===== Top progress bar ===== */
+.progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.06);z-index:200;}
+.progress-bar > div{height:100%;background:var(--accent);width:0%;transition:width .15s ease-out;}
+
+/* ===== Top nav ===== */
+.topnav{position:fixed;top:0;left:0;right:0;z-index:150;display:flex;justify-content:space-between;align-items:center;padding:14px 28px;background:rgba(11,15,20,.75);backdrop-filter:blur(10px);border-bottom:1px solid var(--rule);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim);}
+.topnav .brand{font-family:var(--serif);font-style:italic;font-size:13px;letter-spacing:.04em;text-transform:none;color:var(--ink);font-weight:600;}
+.topnav nav{display:flex;gap:22px;}
+.topnav nav a{text-decoration:none;color:var(--ink-dim);transition:color .15s;cursor:pointer;}
+.topnav nav a:hover,.topnav nav a.active{color:var(--accent);}
+@media(max-width:720px){
+  .topnav nav{display:flex;overflow-x:auto;gap:14px;max-width:62vw;
+    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;}
+  .topnav nav::-webkit-scrollbar{display:none;}
+  .topnav nav a{flex-shrink:0;scroll-snap-align:start;font-size:10.5px;letter-spacing:.08em;padding:4px 0;}
+}
+
+/* ===== Hero ===== */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:80px 8vw 60px;background:
+  radial-gradient(900px 600px at 80% 30%, rgba(233,78,59,.18), transparent 60%),
+  radial-gradient(700px 700px at 10% 80%, rgba(108,182,255,.12), transparent 60%),
+  linear-gradient(180deg,#0B0F14 0%, #0F1620 100%);
+  position:relative;overflow:hidden;}
+.hero-art{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.85;}
+.hero-art .wall-bar{fill:rgba(241,232,217,.04);stroke:rgba(241,232,217,.10);stroke-width:.6;}
+.hero-art .wall-bar.hot{fill:rgba(233,78,59,.08);stroke:rgba(233,78,59,.35);}
+.hero-art .wall-bar.gold{fill:rgba(240,180,41,.06);stroke:rgba(240,180,41,.35);}
+.hero-art .grid-line{stroke:rgba(241,232,217,.05);stroke-width:.5;}
+.hero-art .signal{fill:#E94E3B;}
+.hero-art .signal-ring{fill:none;stroke:#E94E3B;stroke-width:.6;opacity:.4;}
+.hero > *:not(.hero-art){position:relative;z-index:2;}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center, transparent 35%, rgba(11,15,20,.55) 100%);z-index:1;}
+
+/* Section divider art */
+.sec-divider{position:relative;height:140px;overflow:hidden;}
+.sec-divider svg{position:absolute;inset:0;width:100%;height:100%;}
+.sec-divider .pillar{fill:rgba(241,232,217,.05);stroke:rgba(241,232,217,.12);stroke-width:.5;}
+.sec-divider .pillar.hot{fill:rgba(233,78,59,.08);stroke:rgba(233,78,59,.4);}
+.sec-divider .pillar.amber{fill:rgba(240,180,41,.06);stroke:rgba(240,180,41,.4);}
+.sec-divider .line{stroke:rgba(241,232,217,.10);stroke-width:.5;}
+
+/* Prologue section */
+.prologue{padding:140px 8vw 100px;background:
+  radial-gradient(900px 500px at 90% 20%, rgba(108,182,255,.08), transparent 60%),
+  linear-gradient(180deg,#0B0F14 0%, #0E141C 100%);
+  position:relative;}
+.prologue .sec-no{font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:var(--accent-2);font-weight:600;margin-bottom:18px;display:flex;align-items:center;gap:14px;}
+.prologue .sec-no .bar{height:1px;background:var(--accent-2);width:48px;display:inline-block;}
+.prologue h2{font-family:var(--serif);font-weight:800;font-size:clamp(34px,5vw,68px);line-height:1.05;letter-spacing:-.01em;margin:0 0 26px;max-width:1100px;}
+.prologue h2 em{font-style:italic;color:var(--accent-2);font-weight:500;}
+.prologue .lede{font-family:var(--serif);font-style:italic;font-size:clamp(17px,1.4vw,22px);color:var(--ink-dim);max-width:880px;line-height:1.5;margin-bottom:48px;}
+.prologue .body{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:start;max-width:1300px;}
+.prologue .prose{font-family:var(--serif);font-size:17.5px;line-height:1.65;color:var(--ink);max-width:680px;}
+.prologue .prose p{margin:0 0 22px;}
+.prologue .prose p strong{font-weight:700;color:var(--ink);font-style:normal;}
+.prologue .prose p em{font-style:italic;color:var(--accent-2);}
+.prologue .prose .first::first-line{font-variant:small-caps;letter-spacing:.05em;}
+.prologue .prose .first::first-letter{font-family:var(--serif);font-size:64px;float:left;line-height:.85;padding:6px 10px 0 0;color:var(--accent);font-weight:800;}
+
+/* Timeline panel */
+.timeline-wrap{position:sticky;top:80px;padding:8px 0;}
+.timeline-wrap h3{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-mute);font-weight:700;margin:0 0 18px;}
+#ipTimeline{width:100%;height:560px;}
+.tl-axis{stroke:rgba(241,232,217,.16);stroke-width:1;}
+.tl-tick{font-family:var(--sans);font-size:10px;fill:var(--ink-mute);letter-spacing:.06em;}
+.tl-event-dot{stroke:#0B0F14;stroke-width:1.5;cursor:pointer;}
+.tl-event-line{stroke-width:.8;}
+.tl-event-label{font-family:var(--sans);font-size:11.5px;fill:var(--ink);font-weight:600;}
+.tl-event-sub{font-family:var(--sans);font-size:10.5px;fill:var(--ink-dim);}
+.tl-band{stroke:none;}
+
+@media(max-width:1000px){
+  .prologue .body{grid-template-columns:1fr;}
+  .timeline-wrap{position:static;margin-top:40px;}
+}
+
+/* Pull quote */
+.pull-quote{padding:120px 8vw 80px;max-width:1100px;margin:0 auto;text-align:left;position:relative;}
+.pull-quote::before{content:"\201C";position:absolute;left:6vw;top:60px;font-family:var(--serif);font-size:180px;color:rgba(240,180,41,.18);line-height:1;font-style:italic;}
+.pull-quote blockquote{margin:0;font-family:var(--serif);font-style:italic;font-size:clamp(24px,2.7vw,38px);line-height:1.32;font-weight:500;max-width:880px;color:var(--ink);}
+.pull-quote blockquote em{color:var(--accent-2);font-weight:600;}
+.pull-quote cite{display:block;margin-top:24px;font-family:var(--sans);font-style:normal;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-mute);}
+
+/* Map tooltip */
+.map-tooltip{position:absolute;pointer-events:none;background:rgba(11,15,20,.94);color:var(--ink);border:1px solid var(--accent);border-radius:6px;padding:10px 12px;font-size:12px;line-height:1.4;max-width:260px;z-index:30;box-shadow:0 8px 24px rgba(0,0,0,.5);opacity:0;transition:opacity .12s;}
+.map-tooltip.show{opacity:1;}
+.map-tooltip .ttl{font-family:var(--serif);font-weight:700;font-size:14px;color:var(--accent-2);margin-bottom:4px;}
+.map-tooltip .row{display:flex;justify-content:space-between;gap:14px;font-size:11.5px;color:var(--ink-dim);padding:2px 0;}
+.map-tooltip .row b{color:var(--ink);font-weight:600;}
+.map-frame{position:relative;}
+.hub-target{cursor:crosshair;}
+
+/* Sankey panel */
+.sankey-wrap{padding:80px 8vw 100px;max-width:1500px;margin:0 auto;}
+.sankey-wrap h3{font-family:var(--serif);font-size:clamp(24px,2.4vw,34px);font-weight:700;margin:0 0 8px;}
+.sankey-wrap .sub{font-family:var(--serif);font-style:italic;color:var(--ink-dim);font-size:16px;margin-bottom:32px;max-width:880px;}
+#sankeySvg{width:100%;height:540px;}
+.node-rect{cursor:default;}
+.node-label{font-family:var(--sans);font-size:11.5px;font-weight:600;fill:var(--ink);}
+.node-label.right{text-anchor:start;}
+.node-label.left{text-anchor:end;}
+.link{fill:none;mix-blend-mode:screen;opacity:.45;transition:opacity .15s;}
+.link:hover{opacity:.85;}
+.sankey-legend{display:flex;gap:20px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-dim);margin-top:18px;}
+.sankey-legend span{display:inline-flex;align-items:center;gap:6px;}
+.sankey-legend .chip{width:14px;height:8px;border-radius:2px;display:inline-block;}
+.equal-brand{display:inline-flex;align-items:center;gap:18px;text-decoration:none;color:var(--ink);margin-bottom:32px;padding:6px 0;transition:opacity .2s;}
+.equal-brand:hover{opacity:.78;}
+.equal-brand .equal-logo{width:63px;height:63px;flex-shrink:0;color:var(--ink);display:block;}
+.equal-brand .equal-wordmark{font-family:var(--sans);font-size:27px;font-weight:400;letter-spacing:.02em;line-height:1;color:var(--ink);text-transform:none;}
+@media (max-width:720px){
+  .equal-brand{margin-bottom:26px;gap:14px;}
+  .equal-brand .equal-logo{width:51px;height:51px;}
+  .equal-brand .equal-wordmark{font-size:22px;}
+}
+.hero .kicker{font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--accent);margin-bottom:24px;}
+.hero h1{font-family:var(--serif);font-weight:800;font-size:clamp(40px,7vw,108px);line-height:1.02;letter-spacing:-.02em;margin:0 0 22px;max-width:1100px;}
+.hero h1 em{font-style:italic;color:var(--accent-2);font-weight:600;}
+.hero .dek{font-family:var(--serif);font-size:clamp(18px,2vw,26px);max-width:780px;color:var(--ink-dim);font-weight:400;font-style:italic;margin-bottom:36px;}
+.hero .byline{font-size:13px;letter-spacing:.04em;color:var(--ink-mute);}
+.hero .byline strong{color:var(--ink);font-weight:600;}
+.hero .scroll-cue{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);color:var(--ink-mute);font-size:11px;letter-spacing:.3em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:8px;animation:floatdown 2.2s ease-in-out infinite;}
+@keyframes floatdown{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(8px);}}
+.scroll-cue .line{width:1px;height:34px;background:var(--ink-mute);}
+
+/* ===== Generic section heading ===== */
+.section-head{padding:140px 8vw 30px;max-width:1280px;}
+.section-head .sec-no{font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:18px;display:flex;align-items:center;gap:14px;}
+.section-head .sec-no .bar{height:1px;background:var(--accent);width:48px;display:inline-block;}
+.section-head h2{font-family:var(--serif);font-weight:800;font-size:clamp(34px,5vw,68px);line-height:1.05;letter-spacing:-.01em;margin:0 0 18px;}
+.section-head h2 em{font-style:italic;color:var(--accent-2);font-weight:500;}
+.section-head .lede{font-family:var(--serif);font-style:italic;font-size:clamp(17px,1.4vw,22px);color:var(--ink-dim);max-width:780px;line-height:1.5;}
+
+/* ===== Scrolly: sticky viz + scrolling text ===== */
+.scrolly{display:grid;grid-template-columns:55fr 45fr;gap:0;padding:60px 0 80px;position:relative;}
+.scrolly .sticky-graphic{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;padding:80px 4vw 80px 8vw;border-right:1px solid var(--rule);}
+.scrolly .steps{padding:30vh 8vw 60vh 6vw;display:flex;flex-direction:column;gap:38vh;max-width:680px;}
+.scrolly .step{font-family:var(--serif);font-size:clamp(20px,1.7vw,28px);line-height:1.45;color:var(--ink);opacity:.25;transition:opacity .35s ease;font-weight:400;}
+.scrolly .step.active{opacity:1;}
+.scrolly .step strong{font-weight:700;color:var(--accent-2);font-style:normal;}
+.scrolly .step em{color:var(--ink-dim);}
+.scrolly .step .stat{display:block;font-family:var(--sans);font-weight:800;font-size:clamp(40px,5vw,72px);line-height:1;letter-spacing:-.02em;color:var(--accent);margin:6px 0 14px;}
+.scrolly .step .small{font-family:var(--sans);font-size:13px;color:var(--ink-mute);letter-spacing:.04em;font-style:normal;display:block;margin-top:10px;}
+.scrolly .step ul.bullets{list-style:none;padding:0;margin:14px 0 14px 0;font-family:var(--serif);font-size:.92em;line-height:1.5;}
+.scrolly .step ul.bullets li{position:relative;padding:6px 0 6px 22px;border-bottom:1px dashed var(--rule);}
+.scrolly .step ul.bullets li:last-child{border-bottom:0;}
+.scrolly .step ul.bullets li::before{content:"";position:absolute;left:4px;top:14px;width:8px;height:8px;background:var(--accent);border-radius:2px;}
+.scrolly .step ul.bullets li strong{font-style:normal;color:var(--accent-2);font-weight:700;}
+@media(max-width:960px){
+  .scrolly{grid-template-columns:1fr;}
+  .scrolly .sticky-graphic{height:70vh;border-right:0;border-bottom:1px solid var(--rule);position:sticky;top:0;background:var(--bg-0);}
+  .scrolly .steps{padding:24vh 8vw 30vh;gap:30vh;}
+}
+
+/* ===== Viz containers ===== */
+.viz-frame{width:100%;height:100%;max-width:760px;max-height:80vh;position:relative;}
+.viz-frame svg{width:100%;height:100%;display:block;overflow:visible;}
+.viz-title{position:absolute;top:0;left:0;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-mute);font-weight:600;}
+.viz-source{position:absolute;bottom:-26px;left:0;right:0;font-size:10.5px;color:var(--ink-mute);letter-spacing:.02em;}
+
+/* SVG defaults */
+.axis path,.axis line{stroke:var(--rule);}
+.axis text{fill:var(--ink-mute);font-family:var(--sans);font-size:11px;}
+.bar-label{fill:var(--ink);font-size:11px;font-family:var(--sans);font-weight:600;}
+.country-label{fill:var(--ink);font-size:11px;font-family:var(--sans);font-weight:500;}
+.value-label{fill:var(--accent-2);font-size:11px;font-family:var(--sans);font-weight:700;}
+.tick-grid line{stroke:var(--rule);stroke-dasharray:2 4;}
+
+/* Section 2: 6 small multiples grid */
+.chains-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;padding:0 8vw 80px;max-width:1500px;margin:0 auto;}
+@media(max-width:1100px){.chains-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:720px){.chains-grid{grid-template-columns:1fr;gap:16px;padding:0 6vw 60px;}}
+.chain-tile{background:linear-gradient(180deg,var(--bg-1) 0%,var(--bg-0) 100%);border:1px solid var(--rule);border-radius:12px;padding:22px 22px 18px;display:flex;flex-direction:column;}
+.chain-tile h3{font-family:var(--serif);font-size:22px;font-weight:700;margin:0 0 4px;color:var(--ink);}
+.chain-tile .ipc-note{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:14px;font-weight:600;}
+.chain-tile .ipc-note b{color:var(--accent-2);font-weight:700;}
+.chain-tile .n-note{font-size:11px;color:var(--ink-dim);font-style:italic;margin-top:auto;padding-top:12px;border-top:1px dashed var(--rule);}
+.chain-tile svg{width:100%;height:auto;display:block;}
+
+/* Section 3: chain × stage selector (two button rows) */
+.chain-selector{display:flex;flex-direction:column;gap:10px;padding:0 8vw 22px;max-width:1500px;margin:0 auto;}
+.chain-selector .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.chain-selector .row-label{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-mute);font-weight:700;margin-right:8px;align-self:center;min-width:78px;}
+.chain-selector button{background:transparent;color:var(--ink-dim);border:1px solid var(--rule);padding:10px 14px;border-radius:99px;font-family:var(--sans);font-size:12.5px;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:all .15s;min-height:40px;}
+.chain-selector button:hover{color:var(--ink);border-color:var(--ink-dim);}
+.chain-selector .row.chains button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.chain-selector .row.stages button.active{background:var(--accent-2);color:#0B0F14;border-color:var(--accent-2);}
+@media(max-width:720px){
+  .chain-selector{padding:0 4vw 16px;}
+  .chain-selector button{padding:8px 11px;font-size:11.5px;min-height:44px;}
+  .chain-selector .row-label{min-width:auto;}
+}
+
+/* Coda tabs */
+.coda-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:30px 0 24px;}
+.coda-tabs button{background:transparent;color:var(--ink-dim);border:1px solid var(--rule);padding:10px 16px;border-radius:99px;font-family:var(--sans);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;min-height:40px;}
+.coda-tabs button:hover{color:var(--ink);border-color:var(--ink-dim);}
+.coda-tabs button.active{background:var(--accent-2);color:#0B0F14;border-color:var(--accent-2);}
+.coda-content{font-family:var(--serif);font-size:18px;line-height:1.6;color:var(--ink-dim);max-width:1100px;min-height:220px;}
+.coda-content h4{font-family:var(--serif);font-size:23px;font-weight:700;color:var(--ink);margin:0 0 14px;font-style:normal;}
+.coda-content p{margin:0 0 14px;}
+.coda-content em{color:var(--accent-2);font-style:italic;}
+.coda-content strong{color:var(--ink);font-weight:700;font-style:normal;}
+
+/* Section 2 v4: chain card footer source */
+.chain-card .chain-source{margin-top:18px;padding-top:14px;border-top:1px dashed var(--rule);font-size:12px;color:var(--ink-mute);font-style:italic;}
+.chain-card .chain-source b{color:var(--ink-dim);font-weight:700;font-style:normal;}
+
+/* Ranking shift wrap */
+.ranking-wrap{padding:0 8vw 100px;max-width:1500px;margin:0 auto;}
+.ranking-wrap .ranking-h{font-family:var(--serif);font-size:clamp(28px,4vw,46px);font-weight:800;line-height:1.1;margin:14px 0 16px;}
+.ranking-wrap .ranking-h em{font-style:italic;color:var(--accent-2);font-weight:500;}
+.ranking-wrap .ranking-lede{font-family:var(--serif);font-style:italic;font-size:clamp(15px,1.3vw,19px);color:var(--ink-dim);max-width:780px;margin-bottom:24px;}
+.ranking-wrap figure{margin:0;padding:0;}
+.ranking-wrap figcaption{margin-top:16px;font-size:12px;color:var(--ink-mute);max-width:880px;}
+@media(max-width:720px){
+  .ranking-wrap{padding:0 6vw 60px;}
+  #rankingSvg{overflow:visible;}
+}
+
+/* Country picker (Part II bump chart) */
+.country-picker{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 22px;max-width:1300px;}
+.country-picker .row-label{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-mute);font-weight:700;margin-right:8px;}
+.country-picker .picker-sep{color:var(--ink-mute);margin:0 4px;font-weight:700;}
+.country-picker button{background:transparent;color:var(--ink-dim);border:1px solid var(--rule);padding:8px 12px;border-radius:99px;font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;min-height:36px;}
+.country-picker button:hover{color:var(--ink);border-color:var(--ink-dim);}
+.country-picker button.active{color:#fff;border-color:var(--cc, var(--accent));background:var(--cc, var(--accent));}
+.country-picker button.all,.country-picker button:not([style]){background:transparent;border-color:var(--rule);color:var(--ink-dim);}
+.country-picker button.all:hover,.country-picker button:not([style]):hover{color:var(--ink);border-color:var(--ink-dim);}
+
+/* Coda chart (sankey) */
+.coda-chart{margin:18px 0 22px;max-width:1100px;background:rgba(241,232,217,.02);border:1px solid var(--rule);border-radius:8px;padding:16px 20px;}
+.coda-chart svg{width:100%;height:auto;display:block;}
+.coda-chart .chart-title{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-mute);font-weight:600;margin-bottom:10px;}
+.coda-sankey-wrap #codaSankeySvg{max-height:520px;}
+.coda-sankey-legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:10px;font-size:11.5px;color:var(--ink-dim);}
+.coda-sankey-legend span{display:inline-flex;align-items:center;gap:6px;}
+.coda-sankey-legend .chip{width:14px;height:8px;border-radius:2px;display:inline-block;}
+
+/* Section 2: chain ribbons (legacy v3 styles, retained but unused) */
+.chain-wrap{display:grid;grid-template-columns:1fr;gap:32px;padding:0 8vw 80px;max-width:1500px;margin:0 auto;}
+.chain-card{background:linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 100%);border:1px solid var(--rule);border-radius:16px;padding:32px 36px;}
+.chain-card h3{font-family:var(--serif);font-size:clamp(24px,2.4vw,38px);font-weight:700;margin:0 0 8px;}
+.chain-card h3 .tag{font-family:var(--sans);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);font-weight:700;padding:4px 10px;border:1px solid var(--accent);border-radius:99px;vertical-align:middle;margin-left:12px;}
+.chain-card .chain-sub{font-family:var(--serif);font-style:italic;color:var(--ink-dim);font-size:16px;margin-bottom:28px;max-width:880px;}
+.stages{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;position:relative;}
+.stage{padding:22px 22px 22px;border-right:1px solid var(--rule);position:relative;}
+.stage:last-child{border-right:0;}
+.stage .stage-kicker{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.stage .stage-kicker .num{font-family:var(--serif);font-style:italic;font-size:42px;font-weight:700;color:var(--accent);line-height:1;}
+.stage .stage-kicker .name{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-dim);font-weight:700;}
+.stage h4{font-family:var(--serif);font-size:22px;font-weight:700;margin:0 0 12px;color:var(--ink);}
+.stage .techs{font-size:13px;color:var(--ink-dim);margin-bottom:14px;}
+.stage .holders{display:flex;flex-direction:column;gap:6px;margin-top:14px;}
+.holder{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;font-size:12.5px;border-top:1px solid var(--rule);padding:8px 0 4px;}
+.holder .flag{font-size:14px;}
+.holder .name{font-weight:600;color:var(--ink);}
+.holder .ctry{font-size:10.5px;color:var(--ink-mute);letter-spacing:.06em;text-transform:uppercase;}
+.stage .control{margin-top:14px;padding-top:12px;border-top:1px dashed var(--rule);font-size:12.5px;color:var(--ink-dim);font-style:italic;}
+.stage .control b{font-style:normal;color:var(--accent-2);font-weight:600;}
+.barometer{height:6px;background:rgba(255,255,255,.06);border-radius:99px;margin-top:18px;overflow:hidden;position:relative;}
+.barometer > div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));}
+.barometer-lab{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-mute);margin-top:6px;}
+
+@media(max-width:900px){
+  .stages{grid-template-columns:1fr;}
+  .stage{border-right:0;border-bottom:1px solid var(--rule);}
+  .stage:last-child{border-bottom:0;}
+}
+
+/* Section 3: GIS map */
+.gis-wrap{padding:0 0 120px;}
+.gis-controls{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:0 8vw 18px;}
+.gis-controls button{background:transparent;color:var(--ink-dim);border:1px solid var(--rule);padding:10px 16px;border-radius:99px;font-family:var(--sans);font-size:12.5px;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:all .2s;}
+.gis-controls button:hover{color:var(--ink);border-color:var(--ink-dim);}
+.gis-controls button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.map-frame{display:grid;grid-template-columns:1fr 320px;gap:0;max-width:1500px;margin:0 auto;padding:0 8vw;}
+#gisMap{width:100%;height:560px;border:1px solid var(--rule);border-radius:12px;background:radial-gradient(ellipse at center, #16202C 0%, #0B0F14 100%);}
+.map-panel{padding:24px 0 24px 28px;border-left:1px solid var(--rule);margin-left:24px;}
+.map-panel .stage-title{font-family:var(--serif);font-size:24px;font-weight:700;margin:0 0 6px;}
+.map-panel .stage-share{font-family:var(--sans);font-weight:800;font-size:54px;color:var(--accent);line-height:1;letter-spacing:-.02em;margin:8px 0 4px;}
+.map-panel .share-cap{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-mute);}
+.map-panel .desc{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--ink-dim);margin:18px 0 14px;line-height:1.5;}
+.map-panel .leaders{font-size:12.5px;color:var(--ink);}
+.map-panel .leaders div{padding:8px 0;border-bottom:1px dashed var(--rule);display:flex;justify-content:space-between;}
+.map-panel .leaders div span:last-child{color:var(--accent-2);font-weight:700;}
+.country.dim{fill:#1A222E;stroke:#0B0F14;}
+.country.lit{stroke:#0B0F14;}
+.flow-arc{fill:none;stroke:var(--accent);stroke-width:1.5;opacity:.6;}
+.hub{fill:var(--accent-2);stroke:#0B0F14;stroke-width:1.5;}
+.hub-label{font-family:var(--sans);font-size:10.5px;font-weight:700;fill:var(--ink);text-shadow:0 0 6px #0B0F14, 0 0 6px #0B0F14;}
+
+@media(max-width:1000px){
+  .map-frame{grid-template-columns:1fr;}
+  .map-panel{border-left:0;margin-left:0;padding:24px 8vw;border-top:1px solid var(--rule);}
+}
+
+/* Coda */
+.coda{padding:140px 8vw 160px;background:linear-gradient(180deg,#0B0F14 0%,#13202A 100%);}
+.coda h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:800;max-width:1000px;margin:0 0 24px;line-height:1.1;}
+.coda h2 em{font-style:italic;color:var(--accent-2);font-weight:500;}
+.coda p{max-width:760px;font-family:var(--serif);font-size:19px;color:var(--ink-dim);line-height:1.55;font-style:italic;}
+.footer{padding:40px 8vw;border-top:1px solid var(--rule);font-size:12px;color:var(--ink-mute);display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+
+/* helpers */
+.pulse{animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.45;}}
+
+/* ===================== Mobile (≤ 720px) — comprehensive overrides ===================== */
+@media (max-width: 720px){
+  /* Topnav */
+  .topnav{padding:10px 14px;}
+  .topnav .brand{font-size:12px;letter-spacing:.02em;}
+
+  /* Hero */
+  .hero{padding:80px 6vw 70px;min-height:92vh;}
+  .hero .kicker{font-size:10px;letter-spacing:.18em;margin-bottom:18px;}
+  .hero h1{font-size:38px;line-height:1.05;margin-bottom:18px;}
+  .hero .dek{font-size:16px;line-height:1.45;margin-bottom:28px;}
+  .hero .byline{font-size:11.5px;}
+  .scroll-cue{bottom:18px;font-size:9px;letter-spacing:.24em;}
+  .scroll-cue .line{height:24px;}
+
+  /* Generic section heads */
+  .section-head{padding:80px 6vw 18px;}
+  .section-head h2{font-size:28px;line-height:1.1;margin-bottom:14px;}
+  .section-head .lede{font-size:15px;line-height:1.5;}
+
+  /* Prologue */
+  .prologue{padding:80px 6vw 70px;}
+  .prologue h2{font-size:30px;margin-bottom:18px;}
+  .prologue .lede{font-size:15.5px;margin-bottom:28px;}
+  .prologue .body{gap:30px;}
+  .prologue .prose{font-size:15.5px;line-height:1.6;}
+  .prologue .prose .first::first-letter{font-size:48px;padding:4px 8px 0 0;}
+  .timeline-wrap{position:static;margin-top:24px;}
+  #ipTimeline{height:520px;}
+
+  /* Pull quotes */
+  .pull-quote{padding:60px 6vw 50px;}
+  .pull-quote::before{font-size:96px;top:30px;left:4vw;}
+  .pull-quote blockquote{font-size:21px;line-height:1.35;}
+
+  /* Section dividers — shrink */
+  .sec-divider{height:80px;}
+
+  /* Scrolly — stack pattern reinforced */
+  .scrolly{padding:30px 0 50px;}
+  .scrolly .sticky-graphic{height:62vh;padding:30px 5vw;background:rgba(11,15,20,.96);
+    backdrop-filter:blur(6px);box-shadow:0 8px 24px rgba(0,0,0,.35);}
+  .scrolly .steps{padding:14vh 6vw 22vh;gap:24vh;}
+  .scrolly .step{font-size:18px;line-height:1.4;}
+  .scrolly .step .stat{font-size:54px;}
+  .scrolly .step .small{font-size:12px;}
+
+  /* Chain cards */
+  .chain-wrap{padding:0 4vw 60px;gap:24px;}
+  .chain-card{padding:24px 18px;border-radius:12px;}
+  .chain-card h3{font-size:22px;}
+  .chain-card .chain-sub{font-size:14.5px;margin-bottom:22px;}
+  .stage{padding:18px 14px;}
+  .stage h4{font-size:18px;}
+  .stage .stage-kicker .num{font-size:32px;}
+  .stage .stage-kicker .name{font-size:10px;letter-spacing:.18em;}
+  .holder{font-size:12px;grid-template-columns:auto 1fr;gap:8px;}
+  .holder .ctry{grid-column:2;font-size:10px;}
+
+  /* Part III — GIS controls */
+  .gis-controls{gap:6px;padding:0 4vw 14px;}
+  .gis-controls button{padding:10px 13px;font-size:11.5px;min-height:44px;display:inline-flex;align-items:center;}
+
+  /* Map */
+  .gis-wrap{padding:0 0 60px;}
+  .map-frame{padding:0 4vw;gap:0;}
+  #gisMap{height:360px;}
+  .map-panel{padding:22px 0 8px;border:0;margin:0;}
+  .map-panel .stage-share{font-size:42px;}
+  .map-panel .desc{font-size:14.5px;}
+  .hub-label{font-size:9.5px;}
+
+  /* Sankey — horizontal scroll preserves readability */
+  .sankey-wrap{padding:50px 4vw 60px;}
+  .sankey-wrap h3{font-size:20px;}
+  .sankey-wrap .sub{font-size:14.5px;}
+  .sankey-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;
+    margin:0 -4vw;padding:0 4vw;}
+  .sankey-scroll #sankeySvg{min-width:720px;height:440px;}
+  .sankey-legend{font-size:11px;gap:14px;}
+
+  /* Coda */
+  .coda{padding:80px 6vw 90px;}
+  .coda h2{font-size:28px;}
+  .coda p{font-size:15.5px;line-height:1.55;}
+
+  /* Methods panel */
+  #methods{padding:80px 6vw 70px !important;}
+  #methods h2{font-size:28px !important;}
+  #methods > div[style]{grid-template-columns:1fr !important;gap:34px !important;}
+  #methods h3{font-size:18px !important;}
+  #methods p{font-size:15px !important;}
+  #methods ul{font-size:13px !important;}
+
+  /* Footer */
+  .footer{padding:24px 6vw;flex-direction:column;gap:10px;font-size:11px;}
+
+  /* Map tooltip — repositioned for thumb area */
+  .map-tooltip{max-width:240px;font-size:11.5px;padding:8px 10px;}
+  .map-tooltip .ttl{font-size:13px;}
+}
+
+/* ===================== Extra-small phones (≤ 380px) ===================== */
+@media (max-width: 380px){
+  .hero h1{font-size:32px;}
+  .hero .dek{font-size:14.5px;}
+  .section-head h2{font-size:25px;}
+  .prologue h2{font-size:26px;}
+  .scrolly .step{font-size:16.5px;}
+  .scrolly .step .stat{font-size:46px;}
+  .coda h2{font-size:25px;}
+}
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<noscript>
+  <div style="background:#0B0F14;color:#F1E8D9;padding:24px 8vw;border-bottom:1px solid rgba(241,232,217,.2);font-family:'Inter',sans-serif;font-size:14px;">
+    <strong style="color:#F0B429;">This scrollytelling requires JavaScript for the interactive visualisations.</strong>
+    The narrative text below is fully readable without it; the patent-landscape, value-chain and map figures will not load.
+  </div>
+</noscript>
+
+<div class="progress-bar" aria-hidden="true"><div id="progBar"></div></div>
+
+<header class="topnav" role="banner">
+  <div class="brand">The Patent Walls</div>
+  <nav aria-label="Section navigation">
+    <a data-jump="hero">Top</a>
+    <a data-jump="s1">I · Landscape</a>
+    <a data-jump="s2">II · Chains &amp; patents</a>
+    <a data-jump="s3">III · Geography</a>
+    <a data-jump="coda">Coda</a>
+    <a data-jump="methods">Methods</a>
+  </nav>
+</header>
+
+<main id="main">
+<article>
+
+<!-- ===================== HERO ===================== -->
+<section id="hero" class="hero" aria-labelledby="hero-h">
+  <svg class="hero-art" id="heroArt" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+  <a class="equal-brand" href="https://www.equalinternational.org/" target="_blank" rel="noopener noreferrer" aria-label="Equal International">
+    <svg class="equal-logo" viewBox="0 0 63.72 63.72" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g fill="currentColor">
+        <path d="m20.05 16.63 24.41 24.42-5 5L15 21.65l5-5Z"/>
+        <path d="m13 23.66 24.45 24.41-5 5L8 28.67l5-5Z"/>
+        <path d="m50.69 24.18 5 5-9.29 9.32-5-5Z"/>
+        <path d="m44.23 17.71 5 5-9.3 9.29-5-5Z"/>
+      </g>
+    </svg>
+    <span class="equal-wordmark">Equal International</span>
+  </a>
+  <div class="kicker">Intellectual Property Regimes & Green Industrialisation · 2026</div>
+  <h1 id="hero-h">The patent <em>walls</em><br/>around the green transition.</h1>
+  <p class="dek">368,266 green-technology patents. Eight jurisdictions. A handful of firms.<br/>This is the architecture of who gets to industrialise — and who pays the toll.</p>
+  <p class="byline">Elaboração: <strong>Paulo Esteves</strong></p>
+  <div class="scroll-cue" aria-hidden="true"><span>Scroll</span><span class="line"></span></div>
+</section>
+
+<!-- ===================== SECTION 1 — Patent Landscape ===================== -->
+<section id="s1" aria-labelledby="s1-h">
+  <div class="section-head">
+    <div class="sec-no"><span class="bar" aria-hidden="true"></span>Part I · The Landscape</div>
+    <h2 id="s1-h">Where the <em>green patents</em> are — and where they are not.</h2>
+    <p class="lede">The IPC Green Inventory turned WIPO's classification system into a tool for reading climate technology as property. Run that lens over PATENTSCOPE and a structure appears: heavy concentration by topic, by country and over time.</p>
+  </div>
+
+  <div class="scrolly" data-scrolly="s1">
+
+    <div class="sticky-graphic">
+      <div class="viz-frame" id="vizS1">
+        <div class="viz-title" id="vizS1Title">FIG 1 · Patents by topic</div>
+        <svg id="svgS1" viewBox="0 0 760 540" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="viz-source" id="vizS1Source">Source: PATENTSCOPE / IPC Green Inventory (Esteves et al., 2026)</div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step" data-step="s1-0">
+        Start with a number. The PATENTSCOPE corpus assembled through the IPC Green Inventory yields <strong>368,266 unique green patent publications</strong>.
+        <span class="stat">368,266</span>
+        <span class="small">Deduplicated publication numbers · all topic areas · all years</span>
+        It is the most systematic map of who controls climate-critical technologies.
+      </div>
+
+      <div class="step" data-step="s1-1">
+        The corpus is not flat. Eight topic areas concentrate the green innovation frontier — and one of them dominates. <strong>Alternative energy production</strong> alone accounts for nearly <em>47 per cent</em> of all deduplicated publications.
+        <span class="small">Solar, wind, hydrogen, geothermal, biofuels — the technologies of the energy transition itself.</span>
+      </div>
+
+      <div class="step" data-step="s1-2">
+        Volume is one story. <strong>Concentration is another.</strong> The Herfindahl–Hirschman Index, a standard competition metric, reads the country shares within each topic. Even the least concentrated topic — transportation — is dominated by a top-4 of countries that holds nearly three-quarters of the published patents.
+        <span class="small">HHI &gt; 0.25 is conventionally considered highly concentrated. Every topic in this corpus clears that bar.</span>
+      </div>
+
+      <div class="step" data-step="s1-4">
+        Reframe the same evidence as a four-country dominance ratio. Across the eight topics, the <strong>top four jurisdictions hold between 74 and 92 per cent</strong> of all published green patents. The top ten reach <em>93–99 per cent</em>.
+        <span class="stat">93%+</span>
+        <span class="small">CR4 — Combined share of the four leading jurisdictions, every topic.<br/>CR10 — Combined share of the ten leading jurisdictions, every topic.</span>
+      </div>
+
+      <div class="step" data-step="s1-5">
+        Who are those jurisdictions? The priority-origin field — the country of first filing — reads the geography of invention itself. <strong>China, the United States, Japan, South Korea and the European patent system</strong> recur across every topic. The rest of the world is almost everywhere a residual.
+        <span class="small">India and Brazil appear in some topics. South Africa is largely absent.</span>
+      </div>
+
+      <div class="step" data-step="s1-7">
+        And then there is one trajectory the corpus reads more loudly than any other. China's priority-origin filings across the eight topics grew from roughly <strong>456 in 2015–2019 to 4,678 in 2020–2024</strong> — close to a <em>tenfold expansion</em> in five years.
+        <span class="stat">≈ 10×</span>
+        China's share gains are evident where the volume gains are largest:
+        <ul class="bullets">
+          <li><strong>Alternative energy production:</strong> from 8% to 15%;</li>
+          <li><strong>Nuclear power generation:</strong> from 10% to 20%;</li>
+          <li><strong>Energy conservation:</strong> from 14% to 22%.</li>
+        </ul>
+        Concentration is not only <em>between</em> countries; it is also reshuffling <em>within</em> the leading bloc.
+        <span class="small">Source: PATENTSCOPE · top-6 priority origins per topic · 2015–2019 vs 2020–2024 (2025 excluded).</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- divider after Section 1 -->
+<div class="sec-divider"><svg viewBox="0 0 1600 140" preserveAspectRatio="none" id="div1"></svg></div>
+
+<!-- Pull quote between Section 1 and Section 2 -->
+<section class="pull-quote">
+  <blockquote>The corpus does not show a diversification of green innovation. It shows <em>tightening control</em> in the very period when developing countries need to scale these technologies.</blockquote>
+  <cite>— Reading the PATENTSCOPE corpus, 2005 → 2024</cite>
+</section>
+
+<!-- ===================== SECTION 2 — Value chains & patent distribution ===================== -->
+<section id="s2" aria-labelledby="s2-h">
+  <div class="section-head">
+    <div class="sec-no"><span class="bar" aria-hidden="true"></span>Part II · Value chains &amp; patent distribution</div>
+    <h2 id="s2-h">Six chains. Six different <em>patent geographies</em>.</h2>
+    <p class="lede">For each chain, three stages — upstream materials and refining, midstream manufacturing, downstream integration and use — and the firms that hold the patents at each stage. The control barometer summarises, qualitatively, how concentrated each stage is and how high the patent walls are. Sources are listed at the foot of each card and consolidated in Methods.</p>
+  </div>
+
+  <div class="chain-selector" id="chainPickerII" role="group" aria-label="Choose a value chain">
+    <div class="row chains" role="radiogroup" aria-label="Value chain">
+      <span class="row-label">Chain</span>
+      <button data-pick="solar"    class="active">Solar PV</button>
+      <button data-pick="wind">Wind energy</button>
+      <button data-pick="hydrogen">Low-carbon hydrogen</button>
+      <button data-pick="steel">Green steel / H₂-DRI</button>
+      <button data-pick="ev">EVs &amp; green mobility</button>
+      <button data-pick="grid">Grid modernisation</button>
+    </div>
+  </div>
+  <div class="chain-wrap" id="chainWrap"></div>
+
+  <!-- Ranking shift bump chart -->
+  <div class="ranking-wrap">
+    <div class="section-head" style="padding:60px 0 14px;max-width:1300px;">
+      <div class="sec-no"><span class="bar" aria-hidden="true"></span>Comparative reading</div>
+      <h3 class="ranking-h">Where each country ranks, <em>chain by chain</em>.</h3>
+      <p class="ranking-lede">A bump chart of priority-origin rankings: each country's position in the top-5 of each chain, 2020&ndash;2024. Steep slopes mark places where a country leads in some chains but disappears in others.</p>
+    </div>
+    <div class="country-picker" id="countryPicker" role="group" aria-label="Toggle countries on the bump chart">
+      <span class="row-label">Show</span>
+      <button data-cc="ALL" class="all">All</button>
+      <button data-cc="NONE">None</button>
+      <span class="picker-sep" aria-hidden="true">·</span>
+      <button data-cc="CN" class="active" style="--cc:#E94E3B">🇨🇳 China</button>
+      <button data-cc="US" class="active" style="--cc:#6CB6FF">🇺🇸 USA</button>
+      <button data-cc="JP" class="active" style="--cc:#39B383">🇯🇵 Japan</button>
+      <button data-cc="KR" class="active" style="--cc:#9DD3A8">🇰🇷 Korea</button>
+      <button data-cc="EP" class="active" style="--cc:#B084CC">🇪🇺 EPO</button>
+      <button data-cc="DE" class="active" style="--cc:#F0B429">🇩🇪 Germany</button>
+      <button data-cc="FR" class="active" style="--cc:#D89BFF">🇫🇷 France</button>
+      <button data-cc="DK" class="active" style="--cc:#FFB084">🇩🇰 Denmark</button>
+    </div>
+    <figure>
+      <svg id="rankingSvg" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMid meet" role="img"
+           aria-label="Bump chart of priority-origin rankings by country across six value chains."></svg>
+      <figcaption><b>Source:</b> PATENTSCOPE corpus, subtopic-filtered priority origins, 2020&ndash;2024. Countries shown: top-5 by chain. A jurisdiction absent from a chain's top-5 is drawn off the chart (rank 6+).
+      <br><br><b>Note on EP.</b> "EP" is not a country — it is the priority code assigned when an applicant files first at the <em>European Patent Office</em> (EPO), the intergovernmental body that grants European patents on behalf of 39 contracting states (the 27 EU members plus the UK, Switzerland, Norway and others). European multinationals frequently route filings through the EPO instead of filing separately in each national office, which makes EP appear prominently in chains where European industrial leadership is strong (notably wind energy). National European codes — DE, FR, GB, IT — capture filings that did <em>not</em> use the EPO route.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- divider after Section 2 -->
+<div class="sec-divider"><svg viewBox="0 0 1600 140" preserveAspectRatio="none" id="div2" aria-hidden="true"></svg></div>
+
+<!-- Pull quote between Section 2 and Section 3 -->
+<section class="pull-quote">
+  <blockquote>Over 96% of wafer output and roughly 85% of cells and modules are produced inside <em>one</em> vertically integrated cluster. The patent walls and the production walls are the same wall.</blockquote>
+  <cite>— On the solar PV midstream</cite>
+</section>
+
+<!-- ===================== SECTION 3 — GIS Distribution of Value ===================== -->
+<section id="s3" aria-labelledby="s3-h">
+  <div class="section-head">
+    <div class="sec-no"><span class="bar" aria-hidden="true"></span>Part III · The Geography of Value</div>
+    <h2 id="s3-h">Where the <em>value</em> lands, chain by chain.</h2>
+    <p class="lede">Patents map control; geography maps capture. Each chain is dispersed across continents but unevenly: a different country dominates each stage, and the patent-dense stages are not the same for solar PV, wind, hydrogen, steel, EVs and the grid. Choose a chain and a stage to read the geography. Hubs are illustrative regional centres; see Methods for sources.</p>
+  </div>
+
+  <div class="chain-selector" id="chainSelector" role="group" aria-label="Chain and stage selector">
+    <div class="row chains" role="radiogroup" aria-label="Value chain">
+      <span class="row-label">Chain</span>
+      <button data-chain="solar" class="active">Solar PV</button>
+      <button data-chain="wind">Wind energy</button>
+      <button data-chain="hydrogen">Low-carbon hydrogen</button>
+      <button data-chain="steel">Green steel / H₂-DRI</button>
+      <button data-chain="ev">EVs &amp; green mobility</button>
+      <button data-chain="grid">Grid modernisation</button>
+    </div>
+    <div class="row stages" role="radiogroup" aria-label="Chain stage">
+      <span class="row-label">Stage</span>
+      <button data-stage="raw" class="active">① Raw materials</button>
+      <button data-stage="upstream">② Upstream</button>
+      <button data-stage="midstream">③ Midstream</button>
+      <button data-stage="downstream">④ Downstream</button>
+    </div>
+  </div>
+
+  <div class="gis-wrap">
+    <div class="map-frame">
+      <svg id="gisMap" viewBox="0 0 960 560" preserveAspectRatio="xMidYMid meet"></svg>
+      <aside class="map-panel" id="gisPanel"></aside>
+      <div id="mapTooltip" class="map-tooltip"></div>
+    </div>
+  </div>
+
+  </section>
+
+<!-- ===================== CODA ===================== -->
+<section id="coda" class="coda" aria-labelledby="coda-h">
+  <div class="section-head" style="padding:0 0 24px;">
+    <div class="sec-no"><span class="bar" aria-hidden="true"></span>Coda</div>
+    <h2 id="coda-h">Six chains, six <em>contestable openings</em>.</h2>
+  </div>
+  <p style="max-width:880px;">Read together, the patent distribution, the chain geography and the value-share-per-stage point to different policy openings in each chain. Choose a chain to see where the wall is thinnest — and what kind of instrument tends to be effective there.</p>
+  <div class="coda-tabs" id="codaTabs" role="tablist" aria-label="Choose a chain">
+    <button data-coda="solar"    class="active" role="tab">Solar PV</button>
+    <button data-coda="wind"     role="tab">Wind energy</button>
+    <button data-coda="hydrogen" role="tab">Low-carbon hydrogen</button>
+    <button data-coda="steel"    role="tab">Green steel / H₂-DRI</button>
+    <button data-coda="ev"       role="tab">EVs &amp; green mobility</button>
+    <button data-coda="grid"     role="tab">Grid modernisation</button>
+  </div>
+  <div class="coda-content" id="codaContent" role="tabpanel" aria-live="polite"></div>
+</section>
+
+<!-- ===================== METHODS & SOURCES ===================== -->
+<section id="methods" aria-labelledby="m-h" style="padding:140px 8vw 100px;background:linear-gradient(180deg,#0B0F14 0%, #0F1620 100%);border-top:1px solid var(--rule);">
+  <div class="sec-no" style="font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:var(--accent-2);font-weight:600;margin-bottom:18px;display:flex;align-items:center;gap:14px;"><span class="bar" aria-hidden="true" style="height:1px;background:var(--accent-2);width:48px;display:inline-block;"></span>Methods &amp; Sources</div>
+  <h2 id="m-h" style="font-family:var(--serif);font-weight:800;font-size:clamp(28px,3.6vw,46px);line-height:1.1;letter-spacing:-.01em;margin:0 0 30px;max-width:1000px;">How this piece was built.</h2>
+
+  <div style="display:grid;grid-template-columns:1.05fr .95fr;gap:60px;max-width:1280px;">
+    <div style="font-family:var(--serif);font-size:16px;line-height:1.65;color:var(--ink);">
+      <h3 style="font-family:var(--serif);font-size:21px;font-weight:700;color:var(--accent-2);margin:0 0 10px;">The argument in one sentence</h3>
+      <p style="font-style:italic;margin:0 0 24px;">Green industrialisation depends on access to climate-critical technologies, <strong>and</strong> the IP regime concentrates ownership of those technologies in a small set of advanced economies; <strong>but</strong> the chain-by-chain patent distribution differs substantially across solar PV, wind, low-carbon hydrogen, green steel/H₂-DRI, EVs and grid modernisation; <strong>therefore</strong> policy responses must be tailored to <em>where the patent walls are thinnest in each chain</em> rather than apply a uniform template.</p>
+
+      <h3 style="font-family:var(--serif);font-size:21px;font-weight:700;color:var(--accent-2);margin:0 0 10px;">Data</h3>
+      <p>Patent records were retrieved from WIPO's <strong>PATENTSCOPE</strong> using IPC queries aligned to the <strong>IPC Green Inventory</strong>. The analytical dataset contains <strong>368,266 unique publication numbers</strong> drawn from 451,110 merged records, grouped into the eight topic areas reported in the figures. Country-level concentration metrics — HHI, CR4, CR10 — were computed on country shares of deduplicated publications within each topic, following OECD competition-analysis practice. The priority-origin matrix in Figure 5 was tabulated from the manuscript's Table 2 (top-10 priority origins per topic; n = 66,809 publications with priority data).</p>
+
+      <h3 style="font-family:var(--serif);font-size:21px;font-weight:700;color:var(--accent-2);margin:0 0 10px;">Chains: IPC mapping &amp; sources</h3>
+      <p>Part II shows priority-origin patent shares (2020&ndash;2024) for the six chains, computed from the master PATENTSCOPE corpus by filtering on IPC Green Inventory <em>subtopics</em>:</p>
+      <ul style="margin:0 0 18px 18px;padding:0;font-family:var(--sans);font-size:13.5px;line-height:1.6;color:var(--ink-dim);list-style:square;">
+        <li><b style="color:var(--ink);">Solar PV</b> &mdash; subtopic "Solar energy" (n = 375)</li>
+        <li><b style="color:var(--ink);">Wind energy</b> &mdash; subtopic "Wind energy" (n = 937)</li>
+        <li><b style="color:var(--ink);">Low-carbon hydrogen</b> &mdash; subtopic "Fuel cells" as proxy (n = 640)</li>
+        <li><b style="color:var(--ink);">Green steel / H₂-DRI</b> &mdash; "Carbon capture and storage" as closest proxy (n = 922)</li>
+        <li><b style="color:var(--ink);">EVs &amp; green mobility</b> &mdash; "Vehicles in general" (n = 2,639)</li>
+        <li><b style="color:var(--ink);">Grid modernisation</b> &mdash; composite of "Power supply circuitry", "Storage of electrical energy" and "Measurement of electrical consumption" (n = 1,177)</li>
+      </ul>
+      <p>The IPC Green Inventory does not separately classify Green Steel/H₂-DRI; the CCS subtopic is used because it concentrates carbon-reduction patents that overlap with low-carbon steelmaking. Hydrogen is proxied by the Fuel cells subtopic, which captures most low-carbon hydrogen patenting but not all electrolyser-specific filings.</p>
+      <p>Part III uses approximate hub locations and indicative capacity figures consistent with the IEA <em>Energy Technology Perspectives 2023</em> supply-chain mapping and the Consolidated Green Industrialisation Dashboard v5 (Brazil and South Africa case studies). Hub coordinates are <strong>illustrative regional centres</strong>, not exact plant geocodes; per-stage value shares are order-of-magnitude estimates derived from IEA, OECD and industry analyses.</p>
+
+      <h3 style="font-family:var(--serif);font-size:21px;font-weight:700;color:var(--accent-2);margin:0 0 10px;">Limitations</h3>
+      <p>PATENTSCOPE export limits mean some topic counts should be treated as <em>lower bounds</em>. The IPC Green Inventory is policy-relevant but not exhaustive; alternative classifications would produce different patterns. Patent counts are <em>not</em> measures of technological capability — only of ownership claims. Value-share estimates by chain stage are approximations from secondary sources and should be read as orders of magnitude.</p>
+    </div>
+
+    <div style="font-family:var(--sans);font-size:14px;color:var(--ink-dim);line-height:1.65;">
+      <h3 style="font-family:var(--serif);font-size:21px;font-weight:700;color:var(--accent-2);margin:0 0 10px;">Primary sources</h3>
+      <ul style="margin:0 0 24px;padding:0;list-style:none;">
+        <li style="padding:8px 0;border-bottom:1px dashed var(--rule);"><b style="color:var(--ink);">WIPO PATENTSCOPE</b> — corpus source · patentscope.wipo.int</li>
+        <li style="padding:8px 0;border-bottom:1px dashed var(--rule);"><b style="color:var(--ink);">WIPO · IPC Green Inventory</b> — classification scheme</li>
+        <li style="padding:8px 0;border-bottom:1px dashed var(--rule);"><b style="color:var(--ink);">Rivera León et al. 2023</b> — WIPO Working Paper 44 · methodological reference</li>
+        <li style="padding:8px 0;border-bottom:1px dashed var(--rule);"><b style="color:var(--ink);">Lavopa &amp; Menéndez 2023</b> — UNIDO Policy Brief 6 · concentration framing</li>
+        <li style="padding:8px 0;border-bottom:1px dashed var(--rule);"><b style="color:var(--ink);">OECD 2020 · 2021</b> — Green Innovation; Methodologies to Measure Market Competition</li>
+        <li style="padding:8px 0;border-bottom:1px dashed var(--rule);"><b style="color:var(--ink);">IEA 2020 · 2023</b> — Battery patents; Energy Technology Perspectives</li>
+        <li style="padding:8px 0;border-bottom:1px dashed var(--rule);"><b style="color:var(--ink);">UNCTAD 2024b</b> — Frontier Technologies Report</li>
+        <li style="padding:8px 0;border-bottom:1px dashed var(--rule);"><b style="color:var(--ink);">Johnstone, Haščič &amp; Popp 2010</b> — Renewable Energy Policies and Technological Innovation: Evidence Based on Patent Counts</li>
+        <li style="padding:8px 0;border-bottom:1px dashed var(--rule);"><b style="color:var(--ink);">WIPO 2025</b> — World Intellectual Property Indicators</li>
+      </ul>
+
+      <h3 style="font-family:var(--serif);font-size:21px;font-weight:700;color:var(--accent-2);margin:0 0 10px;">Build</h3>
+      <p>Single self-contained HTML. Vanilla JavaScript with D3 v7 for visualisations, TopoJSON for the world map, d3-sankey for the value-flow diagram, and Scrollama for scroll-step detection. Designed for WCAG 2.2 AA: skip link, visible focus, semantic landmarks, <code>prefers-reduced-motion</code> respected, contrast ≥ 4.5:1 for body text. Reads sensibly without JavaScript.</p>
+
+      <h3 style="font-family:var(--serif);font-size:21px;font-weight:700;color:var(--accent-2);margin:0 0 10px;">Citation</h3>
+      <p style="font-style:italic;">Esteves, P. (2026). <em>The Patent Walls Around the Green Transition</em> — interactive companion to "Intellectual Property Regimes and Green Industrialisation". Brighton: Equal International.</p>
+    </div>
+  </div>
+</section>
+
+</article></main>
+
+<footer class="footer">
+  <span>Sources · WIPO PATENTSCOPE · IPC Green Inventory · Esteves et al. (2026) · IEA (2023) · UNCTAD (2024) · OECD (2020) · Hydrogen Council (2021).</span>
+  <span>Design: scrollytelling experiment in the style of Guardian / NYT longform.</span>
+</footer>
+
+<!-- =================================================== -->
+<!-- ========================= SCRIPTS ================= -->
+<!-- =================================================== -->
+<script>
+/* ===================== Data ===================== */
+const TOPICS = [
+  {key:"alt",  label:"Alternative energy production",       n:172346, hhi:0.3973, cr4:0.8167, cr10:0.9375},
+  {key:"ec",   label:"Energy conservation",                  n: 64950, hhi:0.4811, cr4:0.9037, cr10:0.9821},
+  {key:"wm",   label:"Waste management",                     n: 64044, hhi:0.5092, cr4:0.8811, cr10:0.9604},
+  {key:"tr",   label:"Transportation",                       n: 45819, hhi:0.2216, cr4:0.7398, cr10:0.9333},
+  {key:"ag",   label:"Agriculture / forestry",               n: 40000, hhi:0.6638, cr4:0.9187, cr10:0.9736},
+  {key:"ad",   label:"Administrative / regulatory / design", n: 30000, hhi:0.5235, cr4:0.9026, cr10:0.9854},
+  {key:"nu",   label:"Nuclear power generation",             n: 11095, hhi:0.3555, cr4:0.8466, cr10:0.9738},
+  {key:"pc",   label:"Pollution control",                    n: 10499, hhi:0.5170, cr4:0.9154, cr10:0.9770},
+];
+
+// Priority origins — weighted aggregate across the eight topics, computed from
+// Manuscript Table 2 (top-10 priority origins per topic; PATENTSCOPE n = 66,809
+// publications with priority data). See Methods panel for derivation.
+const PRIORITY_ORIGINS = [
+  {iso:"US", label:"United States",  share:0.251, color:"#E94E3B"},
+  {iso:"JP", label:"Japan",          share:0.127, color:"#6CB6FF"},
+  {iso:"CN", label:"China",          share:0.098, color:"#F0B429"},
+  {iso:"FR", label:"France",         share:0.095, color:"#D89BFF"},
+  {iso:"KR", label:"South Korea",    share:0.075, color:"#39B383"},
+  {iso:"DE", label:"Germany",        share:0.062, color:"#9DD3A8"},
+  {iso:"EP", label:"EPO (European)", share:0.062, color:"#B084CC"},
+  {iso:"GB", label:"United Kingdom", share:0.061, color:"#FFB084"},
+  {iso:"IT", label:"Italy",          share:0.017, color:"#84E0FF"},
+  {iso:"OTH",label:"Rest of world",  share:0.152, color:"#8595A7"},
+];
+
+// China's priority-origin filings — before/after split (2015–2019 vs 2020–2024).
+// Source: PATENTSCOPE / IPC Green Inventory; top-6 priority origins per topic;
+// 2025 excluded (incomplete at extraction).
+const CN_RISE = [
+  { topic:"Alternative energy production", before:223, after: 926 },
+  { topic:"Energy conservation",           before: 34, after:1644 },
+  { topic:"Transportation",                before: 74, after: 598 },
+  { topic:"Waste management",              before:105, after: 593 },
+  { topic:"Agriculture / forestry",        before:  8, after: 377 },
+  { topic:"Admin / regulatory",            before:  2, after: 126 },
+  { topic:"Nuclear power generation",      before:  7, after: 306 },
+  { topic:"Pollution control",             before:  3, after: 108 },
+];
+// totals: 456 → 4,678 (≈ 10.3×)
+
+/* ===================== Section 1 — visualisation engine ===================== */
+const svgS1 = d3.select("#svgS1");
+const W = 760, H = 540;
+const titleEl = document.getElementById("vizS1Title");
+const sourceEl = document.getElementById("vizS1Source");
+
+function clearViz(){
+  // Hard, synchronous reset — interrupts any in-flight d3 transitions
+  // and wipes the SVG before the next step draws. Prevents content
+  // accumulation when the user scrolls between steps faster than the
+  // old animated fade-out (~180ms).
+  svgS1.selectAll("*").interrupt();
+  svgS1.selectAll("*").remove();
+}
+
+// Step 0 — big counter
+function drawStep0(){
+  clearViz();
+    titleEl.textContent = "FIG · The size of the corpus";
+    const g = svgS1.append("g");
+    g.append("text")
+      .attr("x", W/2).attr("y", H/2 - 70)
+      .attr("text-anchor","middle")
+      .attr("font-family","'Playfair Display', serif")
+      .attr("font-style","italic")
+      .attr("font-size",18)
+      .attr("fill","#A9B3C2")
+      .text("Unique green-tech patent publications")
+      .style("opacity",0).transition().duration(700).style("opacity",1);
+
+    const counter = g.append("text")
+      .attr("x", W/2).attr("y", H/2 + 30)
+      .attr("text-anchor","middle")
+      .attr("font-family","Inter, sans-serif")
+      .attr("font-weight",900)
+      .attr("font-size",128)
+      .attr("fill","#E94E3B")
+      .attr("letter-spacing","-2")
+      .text("0");
+
+    const FINAL=368266;
+    const t=d3.transition().duration(1800).ease(d3.easeCubicOut);
+    counter.transition(t).tween("text",function(){
+      const i=d3.interpolateNumber(0,FINAL);
+      return function(t){ this.textContent = d3.format(",")(Math.round(i(t))); };
+    });
+
+    g.append("text")
+      .attr("x", W/2).attr("y", H/2 + 80)
+      .attr("text-anchor","middle")
+      .attr("font-size",13).attr("fill","#5C6878")
+      .attr("letter-spacing","3").style("text-transform","uppercase")
+      .text("PATENTSCOPE · IPC Green Inventory · 1900–2025")
+      .style("opacity",0).transition().delay(500).duration(700).style("opacity",1);
+  sourceEl.textContent="Source: PATENTSCOPE / IPC Green Inventory (Esteves et al., 2026).";
+}
+
+// Step 1 — Bar chart of topic volumes
+function drawStep1(){
+  clearViz();
+    titleEl.textContent = "FIG 1 · Patents by topic area (unique publications)";
+    const m={t:30,r:30,b:40,l:230}, w=W-m.l-m.r, h=H-m.t-m.b;
+    const g=svgS1.append("g").attr("transform",`translate(${m.l},${m.t})`);
+    const data = TOPICS.slice().sort((a,b)=>b.n-a.n);
+    const x=d3.scaleLinear().domain([0, d3.max(data,d=>d.n)]).range([0,w]);
+    const y=d3.scaleBand().domain(data.map(d=>d.label)).range([0,h]).padding(.22);
+
+    g.append("g").attr("class","axis").attr("transform",`translate(0,${h})`)
+      .call(d3.axisBottom(x).ticks(5).tickFormat(d=> d>=1000? (d/1000)+"k" : d));
+    g.append("g").attr("class","axis").call(d3.axisLeft(y).tickSize(0));
+
+    g.selectAll(".tick-line")
+      .data(x.ticks(5)).enter().append("line").attr("class","tick-grid")
+      .attr("x1",d=>x(d)).attr("x2",d=>x(d)).attr("y1",0).attr("y2",h)
+      .attr("stroke","rgba(241,232,217,.08)");
+
+    const bars = g.selectAll(".bar").data(data).enter().append("rect")
+      .attr("y",d=>y(d.label)).attr("x",0).attr("height",y.bandwidth())
+      .attr("width",0).attr("fill",(d,i)=> i===0?"#E94E3B":"#3F4A5C")
+      .attr("rx",2);
+    bars.transition().delay((d,i)=>i*60).duration(700)
+      .attr("width",d=>x(d.n));
+
+    g.selectAll(".val").data(data).enter().append("text")
+      .attr("class","value-label")
+      .attr("y",d=>y(d.label)+y.bandwidth()/2+4)
+      .attr("x",d=>x(d.n)+8).attr("fill","#F0B429")
+      .text(d=>d3.format(",")(d.n))
+      .style("opacity",0).transition().delay((d,i)=>i*60+500).duration(400).style("opacity",1);
+  sourceEl.textContent="Note: deduplicated within topic × subtopic × subentry × country × publication number.";
+}
+
+// Step 2 — HHI dot plot intro
+function drawStep2(){
+  clearViz();
+    titleEl.textContent = "FIG 2 · Country concentration (HHI) by topic";
+    const m={t:40,r:50,b:50,l:230}, w=W-m.l-m.r, h=H-m.t-m.b;
+    const g=svgS1.append("g").attr("transform",`translate(${m.l},${m.t})`);
+    const data = TOPICS.slice().sort((a,b)=>b.hhi-a.hhi);
+    const x=d3.scaleLinear().domain([0,0.75]).range([0,w]);
+    const y=d3.scaleBand().domain(data.map(d=>d.label)).range([0,h]).padding(.3);
+
+    g.append("g").attr("class","axis").attr("transform",`translate(0,${h})`)
+      .call(d3.axisBottom(x).ticks(6));
+    g.append("g").attr("class","axis").call(d3.axisLeft(y).tickSize(0));
+
+    // 0.25 threshold
+    g.append("line").attr("x1",x(0.25)).attr("x2",x(0.25))
+      .attr("y1",0).attr("y2",h).attr("stroke","#5C6878").attr("stroke-dasharray","4 4");
+    g.append("text").attr("x",x(0.25)+6).attr("y",-6).attr("fill","#A9B3C2")
+      .attr("font-size",11).attr("font-style","italic")
+      .text("HHI 0.25 — highly concentrated threshold");
+
+    g.append("text").attr("x",w/2).attr("y",h+38).attr("text-anchor","middle")
+      .attr("fill","#A9B3C2").attr("font-size",11).attr("font-style","italic")
+      .text("Herfindahl–Hirschman Index of country shares (higher = more concentrated)");
+
+    // Lines from 0 to value
+    g.selectAll(".lp").data(data).enter().append("line")
+      .attr("class","lp").attr("x1",0).attr("x2",0)
+      .attr("y1",d=>y(d.label)+y.bandwidth()/2).attr("y2",d=>y(d.label)+y.bandwidth()/2)
+      .attr("stroke","#3F4A5C").attr("stroke-width",2)
+      .transition().delay((d,i)=>i*60).duration(600).attr("x2",d=>x(d.hhi));
+
+    g.selectAll(".dot").data(data).enter().append("circle")
+      .attr("class","dot").attr("cx",0)
+      .attr("cy",d=>y(d.label)+y.bandwidth()/2).attr("r",0)
+      .attr("fill",(d,i)=> i===0?"#E94E3B":"#F0B429")
+      .transition().delay((d,i)=>i*60+250).duration(400)
+      .attr("cx",d=>x(d.hhi)).attr("r",7);
+
+    g.selectAll(".lbl").data(data).enter().append("text")
+      .attr("class","value-label")
+      .attr("x",d=>x(d.hhi)+13).attr("y",d=>y(d.label)+y.bandwidth()/2+4)
+      .text(d=>d.hhi.toFixed(2))
+      .style("opacity",0).transition().delay((d,i)=>i*60+500).duration(400).style("opacity",1);
+  sourceEl.textContent="HHI computed from country shares of deduplicated publications per topic.";
+}
+
+
+// Step 4 — CR4 / CR10 grouped bars
+function drawStep4(){
+  clearViz();
+    titleEl.textContent = "FIG 3 · Top-4 vs Top-10 country concentration";
+    const m={t:30,r:30,b:60,l:230}, w=W-m.l-m.r, h=H-m.t-m.b;
+    const g=svgS1.append("g").attr("transform",`translate(${m.l},${m.t})`);
+    const data = TOPICS.slice().sort((a,b)=>b.cr10-a.cr10);
+    const x=d3.scaleLinear().domain([0,1]).range([0,w]);
+    const y=d3.scaleBand().domain(data.map(d=>d.label)).range([0,h]).padding(.25);
+
+    g.append("g").attr("class","axis").attr("transform",`translate(0,${h})`)
+      .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format(".0%")));
+    g.append("g").attr("class","axis").call(d3.axisLeft(y).tickSize(0));
+
+    // CR10 background bar
+    g.selectAll(".b10").data(data).enter().append("rect")
+      .attr("y",d=>y(d.label)).attr("x",0).attr("height",y.bandwidth())
+      .attr("width",0).attr("fill","#3F4A5C").attr("rx",2)
+      .transition().delay((d,i)=>i*55).duration(600).attr("width",d=>x(d.cr10));
+    // CR4 overlay
+    g.selectAll(".b4").data(data).enter().append("rect")
+      .attr("y",d=>y(d.label)+y.bandwidth()*.15).attr("x",0).attr("height",y.bandwidth()*.7)
+      .attr("width",0).attr("fill","#E94E3B").attr("rx",2)
+      .transition().delay((d,i)=>i*55+200).duration(600).attr("width",d=>x(d.cr4));
+
+    // CR4 and CR10 labels
+    g.selectAll(".cr4lbl").data(data).enter().append("text")
+      .attr("y",d=>y(d.label)+y.bandwidth()/2+4)
+      .attr("x",d=>x(d.cr4)-6).attr("fill","#fff").attr("font-size",11)
+      .attr("font-weight",700).attr("text-anchor","end")
+      .text(d=>(d.cr4*100).toFixed(0)+"%")
+      .style("opacity",0).transition().delay((d,i)=>i*55+600).duration(400).style("opacity",1);
+    g.selectAll(".cr10lbl").data(data).enter().append("text")
+      .attr("y",d=>y(d.label)+y.bandwidth()/2+4)
+      .attr("x",d=>x(d.cr10)+6).attr("fill","#F0B429").attr("font-size",11)
+      .attr("font-weight",700).attr("text-anchor","start")
+      .text(d=>(d.cr10*100).toFixed(0)+"%")
+      .style("opacity",0).transition().delay((d,i)=>i*55+600).duration(400).style("opacity",1);
+
+    // legend
+    const lg=svgS1.append("g").attr("transform",`translate(${m.l}, ${H-22})`);
+    lg.append("rect").attr("x",0).attr("y",-8).attr("width",14).attr("height",10).attr("fill","#E94E3B");
+    lg.append("text").attr("x",20).attr("y",1).attr("fill","#A9B3C2").attr("font-size",11).text("CR4 — top 4 countries");
+    lg.append("rect").attr("x",170).attr("y",-8).attr("width",14).attr("height",10).attr("fill","#3F4A5C");
+    lg.append("text").attr("x",190).attr("y",1).attr("fill","#A9B3C2").attr("font-size",11).text("CR10 — top 10 countries");
+  sourceEl.textContent="Note: CR4 and CR10 are conventional concentration ratios used in competition analysis.";
+}
+
+// Step 5 — Priority origins (treemap-ish stacked single bar)
+function drawStep5(){
+  clearViz();
+    titleEl.textContent = "FIG 4 · Priority-origin share (proxy for first filing)";
+    const data = PRIORITY_ORIGINS;
+    const totalShare = d3.sum(data,d=>d.share);
+    const data2 = data.map(d=>({...d, p:d.share/totalShare}));
+
+    const m={t:60,r:30,b:60,l:60}, w=W-m.l-m.r, h=240;
+    const g=svgS1.append("g").attr("transform",`translate(${m.l},${m.t})`);
+
+    let x0=0;
+    data2.forEach((d,i)=>{
+      const wi = d.p*w;
+      g.append("rect").attr("x",x0).attr("y",0).attr("width",0).attr("height",h)
+        .attr("fill",d.color).attr("rx",4)
+        .transition().delay(i*80).duration(600)
+        .attr("width",wi-4);
+      g.append("text").attr("x",x0+(wi-4)/2).attr("y",h+22)
+        .attr("text-anchor","middle").attr("fill","#F1E8D9")
+        .attr("font-size",12).attr("font-weight",700).text(d.iso)
+        .style("opacity",0).transition().delay(i*80+400).duration(400).style("opacity",1);
+      g.append("text").attr("x",x0+(wi-4)/2).attr("y",h+40)
+        .attr("text-anchor","middle").attr("fill","#A9B3C2")
+        .attr("font-size",10).text((d.share*100).toFixed(0)+"%")
+        .style("opacity",0).transition().delay(i*80+500).duration(400).style("opacity",1);
+      x0 += wi;
+    });
+
+    g.append("text").attr("x",0).attr("y",-18)
+      .attr("fill","#A9B3C2").attr("font-size",12).attr("font-style","italic")
+      .text("Approximate weighted average shares across the eight topics");
+
+    // bottom callout
+    svgS1.append("text").attr("x",W/2).attr("y",H-50).attr("text-anchor","middle")
+      .attr("fill","#F1E8D9").attr("font-family","'Playfair Display', serif")
+      .attr("font-style","italic").attr("font-size",18)
+      .text("≈ 9 jurisdictions hold ~94% of priority filings.")
+      .style("opacity",0).transition().delay(900).duration(700).style("opacity",1);
+
+    svgS1.append("text").attr("x",W/2).attr("y",H-20).attr("text-anchor","middle")
+      .attr("fill","#5C6878").attr("font-size",11).attr("letter-spacing","2")
+      .style("text-transform","uppercase").text("The rest of the world is a 6 per cent residual.")
+      .style("opacity",0).transition().delay(1100).duration(700).style("opacity",1);
+  sourceEl.textContent="Note: shares averaged across topics from priority-origin tables.";
+}
+
+
+// Step 7 — China's rise as priority-origin country (2015–2019 vs 2020–2024)
+function drawStep7(){
+  clearViz();
+  titleEl.textContent = "FIG 5 · China · priority-origin filings · 2015–2019 vs 2020–2024";
+  const m={t:46,r:90,b:46,l:200}, w=W-m.l-m.r, h=H-m.t-m.b;
+  const g=svgS1.append("g").attr("transform",`translate(${m.l},${m.t})`);
+  const data = CN_RISE.slice().sort((a,b)=> b.after - a.after);
+  const x=d3.scaleLinear().domain([0, d3.max(data,d=>d.after)*1.05]).range([0,w]);
+  const y=d3.scaleBand().domain(data.map(d=>d.topic)).range([0,h]).padding(.32);
+  const bh = y.bandwidth()/2 - 1;
+
+  g.append("g").attr("class","axis").attr("transform",`translate(0,${h})`)
+    .call(d3.axisBottom(x).ticks(5));
+  g.append("g").attr("class","axis").call(d3.axisLeft(y).tickSize(0));
+
+  // "Before" bars (2015-2019) — pale cream
+  g.selectAll(".bf").data(data).enter().append("rect")
+    .attr("y", d=>y(d.topic))
+    .attr("x", 0).attr("height", bh).attr("width", 0)
+    .attr("fill", "#F1E8D9").attr("opacity", .55).attr("rx",1)
+    .transition().delay((d,i)=>i*55).duration(650)
+    .attr("width", d=>x(d.before));
+
+  // "After" bars (2020-2024) — accent red
+  g.selectAll(".af").data(data).enter().append("rect")
+    .attr("y", d=>y(d.topic)+bh+2)
+    .attr("x", 0).attr("height", bh).attr("width", 0)
+    .attr("fill", "#E94E3B").attr("rx",1)
+    .transition().delay((d,i)=>i*55+260).duration(750)
+    .attr("width", d=>x(d.after));
+
+  // Value labels
+  g.selectAll(".vbf").data(data).enter().append("text")
+    .attr("y", d=>y(d.topic)+bh/2+3).attr("x", d=>x(d.before)+6)
+    .attr("fill","#A9B3C2").attr("font-size",10).attr("font-weight",600)
+    .text(d=>d3.format(",")(d.before))
+    .style("opacity",0).transition().delay((d,i)=>i*55+750).duration(350).style("opacity",1);
+  g.selectAll(".vaf").data(data).enter().append("text")
+    .attr("y", d=>y(d.topic)+bh*1.5+5).attr("x", d=>x(d.after)+6)
+    .attr("fill","#F0B429").attr("font-size",11).attr("font-weight",700)
+    .text(d=>d3.format(",")(d.after))
+    .style("opacity",0).transition().delay((d,i)=>i*55+1050).duration(350).style("opacity",1);
+
+  // Sub-title
+  g.append("text").attr("x",0).attr("y",-18)
+    .attr("fill","#A9B3C2").attr("font-size",11).attr("font-style","italic")
+    .text("Absolute counts, two consecutive 5-year windows");
+
+  // Legend
+  const lg = svgS1.append("g").attr("transform",`translate(${W-m.r-220}, ${m.t-22})`);
+  lg.append("rect").attr("x",0).attr("y",0).attr("width",14).attr("height",9).attr("fill","#F1E8D9").attr("opacity",.55);
+  lg.append("text").attr("x",20).attr("y",8).attr("fill","#A9B3C2").attr("font-size",10).text("2015–2019");
+  lg.append("rect").attr("x",110).attr("y",0).attr("width",14).attr("height",9).attr("fill","#E94E3B");
+  lg.append("text").attr("x",130).attr("y",8).attr("fill","#F0B429").attr("font-size",10).text("2020–2024");
+
+  // Aggregate annotation
+  g.append("text").attr("x",w).attr("y",h+30)
+    .attr("text-anchor","end").attr("fill","#F0B429")
+    .attr("font-size",13).attr("font-weight",700)
+    .text("≈ 10× expansion · 456 → 4,678 filings across the eight topics");
+
+  sourceEl.textContent = "Source: PATENTSCOPE / IPC Green Inventory · top-6 priority origins per topic. 2025 excluded (incomplete at extraction).";
+}
+
+const stepDrawMap = {
+  "s1-0": drawStep0,
+  "s1-1": drawStep1,
+  "s1-2": drawStep2,
+  "s1-4": drawStep4,
+  "s1-5": drawStep5,
+  "s1-7": drawStep7,
+};
+
+/* ===================== Scroll engine for Section 1 (Scrollama + IO fallback) ===================== */
+const stepsS1 = document.querySelectorAll('[data-scrolly="s1"] .step');
+let currentStepId = null;
+function activateStep(element){
+  stepsS1.forEach(s=>s.classList.toggle("active", s===element));
+  const id = element.getAttribute("data-step");
+  currentStepId = id;
+  const fn = stepDrawMap[id];
+  if(fn) fn();
+}
+try {
+  if (typeof scrollama === "function"){
+    const scroller = scrollama();
+    scroller.setup({
+      step: '[data-scrolly="s1"] .step',
+      offset: 0.6,
+      debug: false,
+    }).onStepEnter(({element})=> activateStep(element));
+    window.addEventListener("resize", ()=> scroller.resize(), {passive:true});
+  } else {
+    throw new Error("scrollama not loaded");
+  }
+} catch (err){
+  // Fallback: IntersectionObserver
+  console.warn("[scrolly] using IntersectionObserver fallback —", err.message);
+  let last=null;
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting && e.intersectionRatio > 0.5 && e.target!==last){
+        last = e.target;
+        activateStep(e.target);
+      }
+    });
+  },{threshold:[0.5,0.7]});
+  stepsS1.forEach(s=> io.observe(s));
+}
+
+// Initial draw
+drawStep0();
+
+/* ===================== Section 3 — GIS map ===================== */
+const mapSvg = d3.select("#gisMap");
+const mapW=960, mapH=560;
+const projection = d3.geoNaturalEarth1().scale(180).translate([mapW/2, mapH/2+10]);
+const path = d3.geoPath(projection);
+const gMap = mapSvg.append("g");
+const gFlows = mapSvg.append("g");
+const gHubs = mapSvg.append("g");
+
+/* ============= Section II shares (real PATENTSCOPE data, 2020–2024) =========
+   Source: MASTER_patentscope_merged.csv, subtopics filtered to chain proxies;
+   priority country = first valid 2-letter code in priorities_data; application
+   year 2020–2024 inclusive; 2025 excluded (incomplete at extraction). */
+const CHAIN_SHARES = {
+  solar:    {label:"Solar PV",                    n:375,  ipc:"Alt. Energy → Solar energy",
+             items:[{c:"CN",v:27.5},{c:"KR",v:18.1},{c:"EP",v:8.5},{c:"FR",v:8.3},{c:"US",v:8.0},{c:"OTH",v:29.6}]},
+  wind:     {label:"Wind energy",                 n:937,  ipc:"Alt. Energy → Wind energy",
+             items:[{c:"EP",v:29.8},{c:"CN",v:16.5},{c:"DK",v:8.9},{c:"DE",v:7.4},{c:"US",v:7.4},{c:"OTH",v:30.0}]},
+  hydrogen: {label:"Low-carbon hydrogen",         n:640,  ipc:"Alt. Energy → Fuel cells (proxy)",
+             items:[{c:"JP",v:30.9},{c:"US",v:23.6},{c:"KR",v:18.4},{c:"CN",v:8.3},{c:"EP",v:5.5},{c:"OTH",v:13.3}]},
+  steel:    {label:"Green steel / H₂-DRI",        n:922,  ipc:"Pollution Control → CCS (proxy)",
+             items:[{c:"US",v:39.0},{c:"JP",v:12.0},{c:"CN",v:11.4},{c:"EP",v:10.3},{c:"FR",v:6.4},{c:"OTH",v:20.9}]},
+  ev:       {label:"EVs & green mobility",        n:2639, ipc:"Transportation → Vehicles in general",
+             items:[{c:"JP",v:22.4},{c:"DE",v:16.5},{c:"FR",v:13.7},{c:"US",v:11.4},{c:"CN",v:11.3},{c:"OTH",v:24.7}]},
+  grid:     {label:"Grid modernisation",          n:1177, ipc:"Energy Conservation (composite)",
+             items:[{c:"CN",v:30.7},{c:"KR",v:21.2},{c:"EP",v:11.0},{c:"US",v:9.8},{c:"FR",v:9.3},{c:"OTH",v:18.0}]},
+};
+
+const COUNTRY_COLOUR = {
+  CN:"#E94E3B", US:"#6CB6FF", JP:"#39B383", KR:"#9DD3A8", EP:"#B084CC",
+  DE:"#F0B429", FR:"#D89BFF", GB:"#FFB084", DK:"#6CB6FF", IN:"#84E0FF",
+  IT:"#FFB084", OTH:"#5C6878"
+};
+
+/* ============= Section II — chain cards (firm-level patent holders) ==========
+   Source mix: Consolidated Green Industrialisation Dashboard v5 (Brazil and
+   South Africa case studies); IEA Energy Technology Perspectives 2023; IEA
+   Special Report on Solar PV Supply Chains 2022; IRENA Future of Wind 2019;
+   IEA Global Hydrogen Review 2023; Hydrogen Council 2021; Mission Possible
+   Partnership 2022 (steel); IEA Battery Patents 2020; IEA Global EV Outlook
+   2024; IEA Electricity Grids and Secure Energy Transitions 2023; Watson et
+   al. 2019 (wind patents); Johnstone, Haščič & Popp 2010 (solar).
+   "Control" is a qualitative 0–100 reading: higher = patent-denser / more
+   concentrated, supported by the cited sources. */
+const CHAIN_CARDS = {
+  solar: {
+    name:"Solar Photovoltaics",
+    sub:"From quartz to module assembly; vertical integration runs through one Chinese cluster.",
+    source:"IEA <em>Solar PV Supply Chains</em> 2022; Johnstone et al. 2010; Dashboard v5.",
+    stages:{
+      upstream:{
+        label:"Upstream · Materials & refining",
+        title:"Polysilicon, ingots, wafers",
+        techs:"Solar-grade polysilicon · Czochralski ingots · wafer slicing · TOPCon/HJT/IBC precursors",
+        holders:[
+          {f:"🇨🇳",c:"LONGi",ct:"China · 3,166+ patents · ~200 GW TOPCon"},
+          {f:"🇨🇳",c:"Tongwei",ct:"China · polysilicon + cells"},
+          {f:"🇨🇳",c:"TCL Zhonghuan",ct:"China · ~45% wafers"},
+          {f:"🇩🇪",c:"Wacker Chemie",ct:"Germany · ~60 kt poly-Si/yr"},
+          {f:"🇰🇷",c:"OCI",ct:"South Korea · poly-Si"}
+        ],
+        pattern:"Vertical integration polysilicon→wafer→cell concentrated in a small Chinese cluster.",
+        control:92
+      },
+      midstream:{
+        label:"Midstream · Cells, modules & inverters",
+        title:"Cell architectures + inverter electronics",
+        techs:"TOPCon / HJT cell architectures · module lamination · string and central inverters",
+        holders:[
+          {f:"🇨🇳",c:"JinkoSolar",ct:"China · largest module shipper"},
+          {f:"🇨🇳",c:"JA Solar / Trina",ct:"China · TOPCon leaders"},
+          {f:"🇰🇷",c:"Hanwha Q Cells",ct:"South Korea · Q.ANTUM"},
+          {f:"🇺🇸",c:"First Solar",ct:"USA · CdTe thin-film"},
+          {f:"🇩🇪",c:"SMA Solar",ct:"Germany · inverters"},
+          {f:"🇨🇳",c:"Huawei / Sungrow",ct:"China · inverters"}
+        ],
+        pattern:"Cell/module IP locked; inverter segment more contestable — the realistic entry door.",
+        control:78
+      },
+      downstream:{
+        label:"Downstream · EPC, O&M, integration",
+        title:"Engineering, installation, operations",
+        techs:"EPC · system installation · O&M · distributed and utility-scale deployment",
+        holders:[
+          {f:"🇿🇦",c:"ARTsolar",ct:"South Africa · sole local module assembler"},
+          {f:"🇧🇷",c:"WEG",ct:"Brazil · SiC MOSFET inverters"},
+          {f:"🇧🇷",c:"BYD Camaçari",ct:"Brazil · 5 GW target 2027"},
+          {f:"🌍",c:"EPC ecosystem",ct:"Mature local capacity worldwide"}
+        ],
+        pattern:"Low patent intensity; local participation feasible — but value capture is the thinnest slice.",
+        control:32
+      }
+    }
+  },
+
+  wind: {
+    name:"Wind energy",
+    sub:"Heavy industry with patent-dense midstream — and a few non-OECD producers scaling fast.",
+    source:"IRENA <em>Future of Wind</em> 2019; Watson et al. 2019; IEA Renewables 2023.",
+    stages:{
+      upstream:{
+        label:"Upstream · Materials & components",
+        title:"Bearings, gearboxes, generators, forgings",
+        techs:"Castings · large bearings · gearboxes · permanent-magnet generators · tower steel",
+        holders:[
+          {f:"🇩🇪",c:"ZF Friedrichshafen",ct:"Germany · gearboxes leader (Winergy)"},
+          {f:"🇯🇵",c:"NTN / NSK",ct:"Japan · large bearings"},
+          {f:"🇸🇪",c:"SKF",ct:"Sweden · main shaft bearings"},
+          {f:"🇨🇳",c:"CRRC / ZK Wind",ct:"China · forgings + gearboxes"},
+          {f:"🇨🇳",c:"Inner Mongolia REE",ct:"China · ~80% NdFeB magnets"}
+        ],
+        pattern:"Bearings and gearbox IP in Japan + Germany; rare-earth permanent-magnet feedstock dominated by China.",
+        control:70
+      },
+      midstream:{
+        label:"Midstream · Turbines, blades, towers",
+        title:"Nacelles + rotor blades + control systems",
+        techs:"Nacelles · blades · towers · controls · converters · direct-drive systems · offshore foundations",
+        holders:[
+          {f:"🇩🇰",c:"Vestas",ct:"Denmark · largest OEM globally"},
+          {f:"🇪🇸",c:"Siemens Gamesa",ct:"DE / ES · offshore leader"},
+          {f:"🇺🇸",c:"GE Renewable Energy",ct:"USA · Haliade-X 14 MW"},
+          {f:"🇨🇳",c:"Goldwind / Envision",ct:"China · scaling global market share"},
+          {f:"🇩🇪",c:"Nordex",ct:"Germany · onshore platform"},
+          {f:"🇨🇳",c:"Mingyang",ct:"China · offshore"}
+        ],
+        pattern:"Patent-dense — Vestas, Siemens Gamesa, GE and Goldwind dominate turbine control, blade aerodynamics, offshore foundations.",
+        control:85
+      },
+      downstream:{
+        label:"Downstream · Development, installation, O&M",
+        title:"Wind farm development and operation",
+        techs:"Site development · installation vessels · O&M · marine logistics",
+        holders:[
+          {f:"🇪🇸",c:"Iberdrola",ct:"Spain · global IPP"},
+          {f:"🇩🇰",c:"Ørsted",ct:"Denmark · offshore leader"},
+          {f:"🇺🇸",c:"NextEra",ct:"USA · largest wind operator"},
+          {f:"🇵🇹",c:"EDP Renováveis",ct:"Portugal · global IPP"},
+          {f:"🇧🇷",c:"Casa dos Ventos / Engie BR",ct:"Brazil · NE wind belt"}
+        ],
+        pattern:"Less patent-dense; offshore installation vessels and onshore wind belts are realistic entry segments.",
+        control:45
+      }
+    }
+  },
+
+  hydrogen: {
+    name:"Low-carbon hydrogen",
+    sub:"PGM reserves in Southern Africa; membrane and electrolyser IP in Europe, Japan and the US.",
+    source:"IEA <em>Global Hydrogen Review</em> 2023; Hydrogen Council 2021; IRENA 2020.",
+    stages:{
+      upstream:{
+        label:"Upstream · Materials & catalysts",
+        title:"Platinum-group metals, membranes, catalysts",
+        techs:"Platinum-group metals · Nafion-class membranes · diaphragms · catalyst-coated substrates",
+        holders:[
+          {f:"🇿🇦",c:"Sibanye-Stillwater / Impala",ct:"South Africa · ~80% Pt, >85% Ir reserves"},
+          {f:"🇺🇸",c:"DuPont / Chemours",ct:"USA · Nafion PEM membrane monopoly"},
+          {f:"🇯🇵",c:"Toray / AGC",ct:"Japan · membrane materials"},
+          {f:"🇩🇪",c:"Heraeus",ct:"Germany · PGM catalysts"},
+          {f:"🇧🇪",c:"Umicore",ct:"Belgium · catalysts + recycling"}
+        ],
+        pattern:"Reserves concentrated in Southern Africa; membrane IP held by a small set of US and Japanese chemical firms.",
+        control:88
+      },
+      midstream:{
+        label:"Midstream · Electrolyser stacks",
+        title:"Alkaline, PEM, SOEC stack manufacturing",
+        techs:"Alkaline · PEM · solid-oxide electrolyser cells · catalyst coating · BoP integration · compression",
+        holders:[
+          {f:"🇩🇪",c:"thyssenkrupp nucera",ct:"Germany · alkaline (supplied Unigel BR)"},
+          {f:"🇩🇪",c:"Siemens Energy",ct:"Germany · Silyzer PEM"},
+          {f:"🇳🇴",c:"Nel ASA",ct:"Norway · PEM + alkaline"},
+          {f:"🇬🇧",c:"ITM Power",ct:"UK · PEM specialist"},
+          {f:"🇯🇵",c:"Toshiba",ct:"Japan · SOEC R&D"},
+          {f:"🇨🇳",c:"LONGi Hydrogen",ct:"China · 3.5 GW alkaline"},
+          {f:"🇺🇸",c:"Plug Power",ct:"USA · PEM systems"}
+        ],
+        pattern:"Patent-intensive core of the chain — European, Japanese and increasingly Chinese OEMs hold leading positions across alkaline, PEM and SOEC.",
+        control:95
+      },
+      downstream:{
+        label:"Downstream · Application & integration",
+        title:"Ammonia, mobility, industrial use",
+        techs:"H₂ storage · FCEV · green ammonia · refining · industrial heat",
+        holders:[
+          {f:"🇧🇷",c:"Unigel Camaçari",ct:"Brazil · 60 kt NH₃/yr (tkN stack)"},
+          {f:"🇺🇸",c:"MIDREX",ct:"USA · ~60% global H₂-DRI market"},
+          {f:"🇯🇵",c:"Toyota Mirai",ct:"Japan · FCEV"},
+          {f:"🇰🇷",c:"Hyundai Nexo",ct:"South Korea · FCEV"},
+          {f:"🇳🇴",c:"Yara",ct:"Norway · green ammonia"}
+        ],
+        pattern:"Local integration is achievable, but the patented electrolyser stack still travels with the project; the membrane bottleneck propagates downstream.",
+        control:62
+      }
+    }
+  },
+
+  steel: {
+    name:"Green steel / H₂-DRI",
+    sub:"Iron ore dispersed in BR + AU; DRI process IP concentrated in MIDREX, Tenova, SSAB; steelmaking IP in JP, KR, EU and CN.",
+    source:"Mission Possible Partnership 2022; IEA <em>Iron and Steel Roadmap</em> 2020; Material Economics 2019.",
+    stages:{
+      upstream:{
+        label:"Upstream · Iron ore & DRI process",
+        title:"Mining + H₂-DRI shaft furnace",
+        techs:"Iron-ore mining · DRI shaft furnaces · EAF integration · hydrogen reduction route",
+        holders:[
+          {f:"🇧🇷",c:"Vale",ct:"Brazil · high-grade pellet feed"},
+          {f:"🇦🇺",c:"Rio Tinto / BHP",ct:"Australia · Pilbara iron ore"},
+          {f:"🇺🇸",c:"MIDREX (Kobe JV)",ct:"USA / Japan · ~60% DRI market"},
+          {f:"🇮🇹",c:"Tenova / Danieli",ct:"Italy · EnergIron H₂-DRI"},
+          {f:"🇸🇪",c:"SSAB / LKAB / Vattenfall",ct:"Sweden · HYBRIT pioneer"}
+        ],
+        pattern:"Iron-ore mining dispersed (BR, AU dominate); DRI process IP concentrated in US (MIDREX ~60%), Italy and Sweden.",
+        control:80
+      },
+      midstream:{
+        label:"Midstream · Steelmaking",
+        title:"Integrated mills + EAF + finishing",
+        techs:"Blast furnace/BOF · electric arc furnace · continuous casting · process control",
+        holders:[
+          {f:"🇰🇷",c:"POSCO",ct:"South Korea · Pohang Works"},
+          {f:"🇯🇵",c:"Nippon Steel",ct:"Japan · Kimitsu / Course50"},
+          {f:"🇱🇺",c:"ArcelorMittal",ct:"Luxembourg · global operations"},
+          {f:"🇨🇳",c:"Baowu",ct:"China · largest producer globally"},
+          {f:"🇩🇪",c:"thyssenkrupp Steel",ct:"Germany · SALCOS roadmap"},
+          {f:"🇯🇵",c:"JFE Steel",ct:"Japan · process patents"}
+        ],
+        pattern:"Steel patents and process know-how concentrated in Japan, Korea, EU, China integrated steelmakers.",
+        control:75
+      },
+      downstream:{
+        label:"Downstream · Rolling & applications",
+        title:"Finishing + downstream products",
+        techs:"Hot/cold rolling · galvanising · automotive grades · construction steel",
+        holders:[
+          {f:"🇧🇷",c:"CSN / Gerdau / Usiminas",ct:"Brazil · flat + long products"},
+          {f:"🌍",c:"Auto OEMs",ct:"global · downstream demand"},
+          {f:"🌍",c:"Construction sector",ct:"global · long steel demand"},
+          {f:"🇮🇳",c:"Tata Steel / JSW",ct:"India · large producers"}
+        ],
+        pattern:"Less patent-intensive than process IP upstream; closer to end-user value capture.",
+        control:40
+      }
+    }
+  },
+
+  ev: {
+    name:"EVs & green mobility",
+    sub:"The densest patent cluster in green tech — cells locked in five East Asian + one US firm.",
+    source:"IEA <em>Global EV Outlook</em> 2024; IEA <em>Battery Patents</em> 2020; OECD 2022.",
+    stages:{
+      upstream:{
+        label:"Upstream · Critical minerals & materials",
+        title:"Li, Co, Ni, graphite + CAM/anode",
+        techs:"Lithium refining · cobalt · nickel · graphite · cathode/anode active materials · electrolyte salts",
+        holders:[
+          {f:"🇨🇱",c:"SQM",ct:"Chile · lithium brine"},
+          {f:"🇺🇸",c:"Albemarle",ct:"USA · Li (CL + AU)"},
+          {f:"🇨🇳",c:"Tianqi / Ganfeng",ct:"China · Li refining"},
+          {f:"🇨🇭",c:"Glencore",ct:"Switzerland · cobalt (CD)"},
+          {f:"🇰🇷",c:"POSCO Future M",ct:"South Korea · CAM + precursor"},
+          {f:"🇯🇵",c:"Sumitomo Metal Mining",ct:"Japan · NCM CAM"},
+          {f:"🇧🇪",c:"Umicore",ct:"Belgium · CAM + recycling"}
+        ],
+        pattern:"Mining dispersed (CL, AU, CD, ID); refining and cathode/anode active materials concentrated in China + Korea.",
+        control:72
+      },
+      midstream:{
+        label:"Midstream · Battery cells & packs",
+        title:"NMC, LFP, solid-state cells",
+        techs:"Cells (NMC, LFP) · solid-state · BMS · pack assembly · gigafactories",
+        holders:[
+          {f:"🇨🇳",c:"CATL",ct:"China · 43,000+ patents · ~35% market"},
+          {f:"🇨🇳",c:"BYD",ct:"China · Blade Battery LFP"},
+          {f:"🇰🇷",c:"LG Energy Solution",ct:"South Korea · 78,000+ patents"},
+          {f:"🇰🇷",c:"Samsung SDI",ct:"South Korea · NMC + solid-state"},
+          {f:"🇯🇵",c:"Panasonic",ct:"Japan · cylindrical cells (Tesla)"},
+          {f:"🇯🇵",c:"Toyota",ct:"Japan · solid-state R&D"},
+          {f:"🇺🇸",c:"Tesla / Panasonic NV",ct:"USA · 35 GWh/yr Gigafactory"}
+        ],
+        pattern:"Extreme concentration — CATL + BYD + LG ES + Samsung + Panasonic hold the majority of cell-chemistry and manufacturing-process patents.",
+        control:95
+      },
+      downstream:{
+        label:"Downstream · Vehicle assembly",
+        title:"Drivetrain + thermal + vehicle control",
+        techs:"Pack integration · drivetrain · power electronics · thermal management · charging · vehicle control",
+        holders:[
+          {f:"🇯🇵",c:"Toyota",ct:"Japan · global volumes"},
+          {f:"🇰🇷",c:"Hyundai-Kia",ct:"South Korea · E-GMP platform"},
+          {f:"🇩🇪",c:"VW Group",ct:"Germany · MEB platform"},
+          {f:"🇺🇸",c:"Tesla",ct:"USA · vertically integrated"},
+          {f:"🇨🇳",c:"BYD",ct:"China · world's largest NEV maker"},
+          {f:"🇧🇷",c:"BYD Camaçari / Stellantis",ct:"Brazil · assembly + flex-fuel hybrid"}
+        ],
+        pattern:"Power electronics and drivetrain patents concentrated in JP, KR, DE, US, CN; vehicle assembly contestable through local-content policies.",
+        control:55
+      }
+    }
+  },
+
+  grid: {
+    name:"Grid modernisation",
+    sub:"High-voltage core in Hitachi, Siemens, GE, ABB; distribution-edge and software more contestable.",
+    source:"IEA <em>Electricity Grids and Secure Energy Transitions</em> 2023; IRENA <em>World Energy Transitions Outlook</em> 2023.",
+    stages:{
+      upstream:{
+        label:"Upstream · Power semis & cables",
+        title:"SiC/GaN semis + HV cables + cores",
+        techs:"SiC / GaN power semis · HV cables · transformer cores · insulation · IGBT modules",
+        holders:[
+          {f:"🇩🇪",c:"Infineon",ct:"Germany · power semis leader"},
+          {f:"🇺🇸",c:"Wolfspeed",ct:"USA · SiC pioneer (ex-Cree)"},
+          {f:"🇯🇵",c:"Mitsubishi / Fuji",ct:"Japan · IGBT + HVDC"},
+          {f:"🇨🇭",c:"ABB / Hitachi",ct:"CH / JP · HV cables"},
+          {f:"🇮🇹",c:"Prysmian",ct:"Italy · HV cable systems"},
+          {f:"🇩🇰",c:"NKT",ct:"Denmark · HV cable systems"}
+        ],
+        pattern:"Power semiconductors and HV cable IP concentrated in DE, US, JP, IT specialty firms.",
+        control:78
+      },
+      midstream:{
+        label:"Midstream · T&D equipment",
+        title:"HV transformers, SCADA, smart inverters",
+        techs:"HV transformers · switchgear · SCADA · DERMS · smart inverters · BESS integration",
+        holders:[
+          {f:"🇨🇭",c:"Hitachi Energy",ct:"CH / JP · HVDC leader (ex-ABB Power Grids)"},
+          {f:"🇩🇪",c:"Siemens Energy",ct:"Germany · global T&D"},
+          {f:"🇺🇸",c:"GE Grid Solutions",ct:"USA · global T&D"},
+          {f:"🇨🇭",c:"ABB",ct:"Switzerland · automation + electrification"},
+          {f:"🇨🇳",c:"State Grid (NARI)",ct:"China · SCADA + HVDC"},
+          {f:"🇨🇳",c:"Sungrow / Huawei",ct:"China · smart inverters · ~30% global"}
+        ],
+        pattern:"T&D equipment IP concentrated in Hitachi, Siemens, GE, ABB; Chinese national champions scaling fast.",
+        control:80
+      },
+      downstream:{
+        label:"Downstream · Operations & smart edge",
+        title:"Grid operators + smart meters + EV charging",
+        techs:"Grid operations · distribution networks · smart meters · EV chargers · DERMS · smart cities",
+        holders:[
+          {f:"🇨🇳",c:"State Grid + Southern",ct:"China · largest utility globally"},
+          {f:"🇪🇺",c:"ENTSO-E TSOs",ct:"EU · transmission coordination"},
+          {f:"🇺🇸",c:"CAISO / PJM / ERCOT",ct:"USA · ISOs"},
+          {f:"🇯🇵",c:"TEPCO",ct:"Japan · largest utility"},
+          {f:"🇧🇷",c:"ONS",ct:"Brazil · national operator"},
+          {f:"🇿🇦",c:"Eskom",ct:"South Africa · vertically integrated"}
+        ],
+        pattern:"Operational know-how distributed across utilities; smart meters, DERMS software and EV charging are contestable entry points.",
+        control:50
+      }
+    }
+  }
+};
+
+function renderChainCards(){
+  const wrap = document.getElementById("chainWrap");
+  if(!wrap) return;
+  const STAGE_KEYS = ["upstream","midstream","downstream"];
+  Object.keys(CHAIN_CARDS).forEach((key,idx)=>{
+    const ch = CHAIN_CARDS[key];
+    const card = document.createElement("div");
+    card.className = "chain-card";
+    card.dataset.chain = key;
+    if(key !== "solar") card.style.display = "none";
+    let stagesHtml = '<div class="stages">';
+    STAGE_KEYS.forEach((sk,si)=>{
+      const st = ch.stages[sk];
+      const tone = si===0 ? 'rgba(233,78,59,.06)' : si===2 ? 'rgba(57,179,131,.06)' : 'transparent';
+      const holdersHtml = st.holders.map(h=>`<div class="holder"><span class="flag">${h.f}</span><span class="name">${h.c}</span><span class="ctry">${h.ct}</span></div>`).join("");
+      stagesHtml += `
+        <div class="stage" style="background:linear-gradient(180deg,${tone},transparent);">
+          <div class="stage-kicker"><span class="num">0${si+1}</span><span class="name">${st.label}</span></div>
+          <h4>${st.title}</h4>
+          <div class="techs">${st.techs}</div>
+          <div class="holders">${holdersHtml}</div>
+          <div class="control"><b>Structural pattern:</b> ${st.pattern}</div>
+          <div class="barometer"><div style="width:${st.control}%"></div></div>
+          <div class="barometer-lab"><span>Contestable</span><span>Locked</span></div>
+        </div>`;
+    });
+    stagesHtml += '</div>';
+    card.innerHTML = `
+      <h3>${ch.name}<span class="tag">Chain ${idx+1}</span></h3>
+      <div class="chain-sub">${ch.sub}</div>
+      ${stagesHtml}
+      <div class="chain-source"><b>Source:</b> ${ch.source}</div>
+    `;
+    wrap.appendChild(card);
+  });
+}
+renderChainCards();
+
+// Chain picker (Part II) — swap cards on click with a soft fade
+document.querySelectorAll('#chainPickerII .row.chains button').forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll('#chainPickerII .row.chains button').forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    const pick = b.dataset.pick;
+    document.querySelectorAll('#chainWrap .chain-card').forEach(card=>{
+      const match = card.dataset.chain === pick;
+      if(match){
+        card.style.display = "block";
+        card.style.opacity = "0";
+        requestAnimationFrame(()=>{ card.style.transition="opacity .35s ease"; card.style.opacity="1"; });
+      } else {
+        card.style.display = "none";
+      }
+    });
+  });
+});
+
+/* ============= Ranking shift bump chart (interactive + animated) ============
+   Country toggle: each country line shown/hidden with d3 transitions; All / None
+   shortcuts. */
+const RANK_TRACKED = ["CN","US","JP","KR","EP","DE","FR","DK"];
+const RANK_COLOUR = {CN:"#E94E3B",US:"#6CB6FF",JP:"#39B383",KR:"#9DD3A8",EP:"#B084CC",DE:"#F0B429",FR:"#D89BFF",DK:"#FFB084"};
+const RANK_CHAIN_ORDER = ["solar","wind","hydrogen","steel","ev","grid"];
+const RANK_CHAIN_LABEL = {solar:"Solar PV", wind:"Wind", hydrogen:"Hydrogen", steel:"Green steel", ev:"EVs", grid:"Grid"};
+const activeCountries = new Set(RANK_TRACKED);
+
+function rankFor(cc, ck){
+  const items = CHAIN_SHARES[ck].items;
+  const idx = items.findIndex(it=>it.c===cc);
+  return (idx>=0 && idx<5) ? idx+1 : 6;
+}
+
+function ensureRankingScaffold(){
+  const svg = d3.select("#rankingSvg");
+  if(svg.empty() || svg.select("g.scaffold").size()) return svg;
+  const W=1200, H=520, m={t:50,r:200,b:60,l:70};
+  const w=W-m.l-m.r, h=H-m.t-m.b;
+  const x = d3.scalePoint().domain(RANK_CHAIN_ORDER).range([0,w]).padding(0.3);
+  const y = d3.scaleLinear().domain([1,6]).range([0,h]);
+  const g = svg.append("g").attr("class","scaffold").attr("transform",`translate(${m.l},${m.t})`);
+
+  // rank guides
+  for(let i=1;i<=5;i++){
+    g.append("line").attr("x1",0).attr("x2",w).attr("y1",y(i)).attr("y2",y(i))
+      .attr("stroke","rgba(241,232,217,.06)").attr("stroke-dasharray","2 5");
+    g.append("text").attr("x",-12).attr("y",y(i)+3).attr("text-anchor","end")
+      .attr("fill","#8595A7").attr("font-size",11).attr("font-weight",600).text("#"+i);
+  }
+  g.append("text").attr("x",-12).attr("y",y(6)+3).attr("text-anchor","end")
+    .attr("fill","#5C6878").attr("font-size",10).attr("font-style","italic").text("off-top-5");
+
+  // chain labels
+  RANK_CHAIN_ORDER.forEach(ck=>{
+    g.append("text").attr("x",x(ck)).attr("y",h+30).attr("text-anchor","middle")
+      .attr("fill","#F1E8D9").attr("font-size",12).attr("font-weight",700)
+      .text(RANK_CHAIN_LABEL[ck]);
+  });
+
+  // title
+  g.append("text").attr("x",0).attr("y",-18)
+    .attr("fill","#A9B3C2").attr("font-size",12).attr("font-style","italic")
+    .text("Rank within each chain's top-5 priority origins · click countries to compare");
+
+  // group for series, kept above scaffold
+  svg.append("g").attr("class","series").attr("transform",`translate(${m.l},${m.t})`);
+  svg.node().__rankScale = {x, y, w, h, m};
+  return svg;
+}
+
+function renderRankingShift(){
+  const svg = ensureRankingScaffold();
+  const {x,y} = svg.node().__rankScale;
+  const line = d3.line().x(d=>x(d.chain)).y(d=>y(d.rank)).curve(d3.curveMonotoneX);
+  const series = svg.select("g.series");
+
+  const data = RANK_TRACKED.map(cc=>({
+    cc,
+    on: activeCountries.has(cc),
+    series: RANK_CHAIN_ORDER.map(ck=>({chain:ck, rank: rankFor(cc,ck)}))
+  }));
+
+  // PATHS — bound by cc
+  const paths = series.selectAll("path.line").data(data, d=>d.cc);
+  paths.enter().append("path").attr("class","line")
+    .attr("fill","none").attr("stroke-linecap","round").attr("stroke-width",3)
+    .attr("opacity",0)
+    .merge(paths)
+    .attr("stroke", d=>RANK_COLOUR[d.cc])
+    .attr("d", d=>line(d.series))
+    .transition().duration(550)
+    .attr("opacity", d=>d.on?0.88:0);
+
+  // initial draw-in for newly added lines
+  paths.enter().each(function(d){
+    const node = this;
+    const L = node.getTotalLength ? node.getTotalLength() : 0;
+    if(L){
+      d3.select(node).attr("stroke-dasharray",`${L} ${L}`).attr("stroke-dashoffset",L)
+        .transition().duration(900).attr("stroke-dashoffset",0);
+    }
+  });
+
+  // DOTS — flatten to per-point so we can join by cc+chain
+  const flat = data.flatMap(d=>d.series.map(pt=>({...pt, cc:d.cc, on:d.on})));
+  const dots = series.selectAll("circle.dot").data(flat, d=>d.cc+"|"+d.chain);
+  dots.enter().append("circle").attr("class","dot")
+    .attr("stroke","#0B0F14").attr("stroke-width",1.5).attr("r",0)
+    .merge(dots)
+    .attr("cx",d=>x(d.chain)).attr("cy",d=>y(d.rank))
+    .attr("fill",d=>RANK_COLOUR[d.cc])
+    .transition().duration(550)
+    .attr("r",d=>d.on?5:0)
+    .attr("opacity",d=>d.on?1:0);
+
+  // END LABELS — one per cc at last chain
+  const labelData = data.map(d=>({cc:d.cc, on:d.on, last:d.series[d.series.length-1]}));
+  const labels = series.selectAll("text.endlbl").data(labelData, d=>d.cc);
+  labels.enter().append("text").attr("class","endlbl")
+    .attr("font-size",12).attr("font-weight",700).attr("opacity",0)
+    .merge(labels)
+    .attr("x", d=>x(d.last.chain)+12)
+    .attr("y", d=>y(d.last.rank)+4)
+    .attr("fill",d=>RANK_COLOUR[d.cc])
+    .text(d=>d.cc)
+    .transition().duration(550)
+    .attr("opacity", d=>d.on?1:0);
+}
+
+// Country buttons
+document.querySelectorAll('#countryPicker button').forEach(b=>{
+  b.addEventListener("click", ()=>{
+    const cc = b.dataset.cc;
+    if(cc==="ALL"){
+      RANK_TRACKED.forEach(c=>activeCountries.add(c));
+      document.querySelectorAll('#countryPicker button[data-cc]').forEach(x=>{
+        if(x.dataset.cc!=="ALL" && x.dataset.cc!=="NONE") x.classList.add("active");
+      });
+    } else if(cc==="NONE"){
+      activeCountries.clear();
+      document.querySelectorAll('#countryPicker button[data-cc]').forEach(x=>{
+        if(x.dataset.cc!=="ALL" && x.dataset.cc!=="NONE") x.classList.remove("active");
+      });
+    } else {
+      if(activeCountries.has(cc)){
+        activeCountries.delete(cc); b.classList.remove("active");
+      } else {
+        activeCountries.add(cc); b.classList.add("active");
+      }
+    }
+    renderRankingShift();
+  });
+});
+
+renderRankingShift();
+
+/* ============= Section III — chain × stage geography =========================
+   For each of the six chains, four stages (raw materials, upstream, midstream,
+   downstream) with: stage-share-of-chain-value, leaders, hub locations.
+   Hub coordinates are illustrative regional centres (IEA ETP 2023 supply-chain
+   mapping; Consolidated Dashboard v5 SA/Brazil case studies). See Methods. */
+const CHAINS = {
+  solar: { name:"Solar PV", stages:{
+    raw: {share:"~3%",
+      desc:"Quartz, silica sand and metallurgical-grade silicon. Dispersed across producers; thin margins.",
+      leaders:[{c:"China",v:"≈ 65% Si-metal"},{c:"Norway / Brazil",v:"~10% each"},{c:"USA",v:"residual"}],
+      hubs:[
+        {name:"Xinjiang (CN)",coords:[85,43],r:14,detail:{plant:"Hoshine Si-metal cluster",cap:"~1.0 Mt/yr",year:"2020"}},
+        {name:"Yunnan (CN)",coords:[102,25],r:10,detail:{plant:"Yunnan ferrosilicon belt",cap:"~0.4 Mt/yr",year:"2018"}},
+        {name:"Norway",coords:[10,62],r:7,detail:{plant:"Elkem, Wacker Holla",cap:"~0.3 Mt/yr",year:"1972"}},
+        {name:"Brazil",coords:[-50,-14],r:7,detail:{plant:"RIMA / Minasligas",cap:"~0.2 Mt/yr",year:"1976"}},
+        {name:"USA",coords:[-90,33],r:6,detail:{plant:"Mississippi Silicon",cap:"~0.05 Mt/yr",year:"2015"}}
+      ]},
+    upstream: {share:"~12%",
+      desc:"Polysilicon refining (Siemens / FBR). ≈ 80% of capacity in China; Wacker (DE) and OCI (KR) the major non-Chinese alternatives.",
+      leaders:[{c:"China",v:"≈ 80%"},{c:"Germany",v:"≈ 8%"},{c:"South Korea",v:"≈ 4%"},{c:"USA",v:"≈ 3%"}],
+      hubs:[
+        {name:"Xinjiang (CN)",coords:[85,43],r:24,detail:{plant:"GCL, Daqo, Xinte",cap:"~600 kt/yr poly-Si",year:"2010s"}},
+        {name:"Inner Mongolia (CN)",coords:[111,42],r:18,detail:{plant:"Tongwei, GCL FBR",cap:"~250 kt/yr",year:"2022"}},
+        {name:"Wacker (DE)",coords:[12,48],r:10,detail:{plant:"Wacker Burghausen",cap:"~60 kt/yr",year:"1958"}},
+        {name:"OCI (KR)",coords:[127,37],r:8,detail:{plant:"OCI Korea + Malaysia",cap:"~35 kt/yr",year:"2008"}},
+        {name:"Hemlock (US)",coords:[-84,43],r:7,detail:{plant:"Hemlock Semiconductor",cap:"~30 kt/yr",year:"1961"}}
+      ]},
+    midstream: {share:"~55%",
+      desc:"Wafers, cells, modules and inverters. Patent-dense; ≈ 96% of wafers and ~85% of cells/modules from one vertically integrated Chinese cluster.",
+      leaders:[{c:"China",v:"≈ 85%"},{c:"Vietnam",v:"≈ 5%"},{c:"Malaysia/Thailand",v:"≈ 4%"},{c:"USA",v:"~3% (post-IRA)"}],
+      hubs:[
+        {name:"Jiangsu (CN)",coords:[120,33],r:24,detail:{plant:"LONGi, JinkoSolar, JA Solar",cap:"~200 GW wafer+cell",year:"2020+"}},
+        {name:"Zhejiang (CN)",coords:[120,29],r:16,detail:{plant:"Tongwei, Trina, Risen",cap:"~120 GW",year:"2020+"}},
+        {name:"Vietnam",coords:[106,16],r:11,detail:{plant:"Trina VN, JA Solar VN",cap:"~25 GW",year:"2018+"}},
+        {name:"Korea",coords:[127,37],r:9,detail:{plant:"Hanwha Q Cells",cap:"~8 GW",year:"2014"}},
+        {name:"USA",coords:[-83,33],r:9,detail:{plant:"First Solar, Qcells GA",cap:"~12 GW",year:"2022+"}}
+      ]},
+    downstream: {share:"~30%",
+      desc:"EPC, installation, O&M, grid integration. Geographically distributed; per-watt value comparatively low.",
+      leaders:[{c:"China",v:"≈ 35% installed"},{c:"EU",v:"≈ 12%"},{c:"USA",v:"≈ 14%"},{c:"India",v:"≈ 8%"},{c:"Brazil",v:"≈ 5%"}],
+      hubs:[
+        {name:"China",coords:[105,35],r:18,detail:{plant:"Largest installed base",cap:"~610 GW",year:"2023"}},
+        {name:"USA",coords:[-98,38],r:13,detail:{plant:"Utility + distributed PV",cap:"~140 GW",year:"2023"}},
+        {name:"India",coords:[78,22],r:11,detail:{plant:"Rajasthan/Gujarat parks",cap:"~70 GW",year:"2023"}},
+        {name:"EU",coords:[10,50],r:11,detail:{plant:"DE/ES/IT/NL",cap:"~270 GW",year:"2023"}},
+        {name:"Brazil",coords:[-50,-14],r:10,detail:{plant:"NE wind+solar + GD",cap:"~48 GW",year:"2024"}}
+      ]}
+  }},
+
+  wind: { name:"Wind energy", stages:{
+    raw: {share:"~8%",
+      desc:"Steel for towers, rare-earth permanent magnets (NdFeB) for direct-drive nacelles, copper for generators.",
+      leaders:[{c:"China",v:"≈ 80% NdFeB"},{c:"Brazil / Australia",v:"iron ore"},{c:"DR Congo",v:"copper / Co"}],
+      hubs:[
+        {name:"Inner Mongolia (CN)",coords:[111,42],r:18,detail:{plant:"Rare-earth refining cluster",cap:"≈ 80% NdFeB",year:"ongoing"}},
+        {name:"Carajás (BR)",coords:[-50,-6],r:10,detail:{plant:"Vale iron ore",cap:"~150 Mt/yr",year:"1985+"}},
+        {name:"Pilbara (AU)",coords:[118,-22],r:11,detail:{plant:"Rio Tinto / BHP",cap:"~900 Mt/yr",year:"1960s+"}},
+        {name:"Bayan Obo (CN)",coords:[110,41],r:9,detail:{plant:"REE mine",cap:"largest globally",year:"1957+"}}
+      ]},
+    upstream: {share:"~20%",
+      desc:"Forgings, castings, large bearings, generators, gearboxes. Heavy industry with significant Chinese capacity expansion.",
+      leaders:[{c:"China",v:"forgings + bearings"},{c:"Germany",v:"gearboxes (ZF, Winergy)"},{c:"Japan",v:"bearings (NTN, NSK)"}],
+      hubs:[
+        {name:"Jiangsu (CN)",coords:[120,33],r:14,detail:{plant:"Forging + casting cluster",cap:"large bearings",year:"2010+"}},
+        {name:"Henan (CN)",coords:[113,34],r:11,detail:{plant:"CRRC, ZK Wind",cap:"gearboxes",year:"2015+"}},
+        {name:"Friedrichshafen (DE)",coords:[9.5,48],r:10,detail:{plant:"ZF Wind Power",cap:"gearboxes leader",year:"1972"}},
+        {name:"Japan",coords:[138,36],r:8,detail:{plant:"NTN, NSK bearings",cap:"global supplier",year:"longstanding"}}
+      ]},
+    midstream: {share:"~52%",
+      desc:"Nacelles, blades, towers, control systems and converters. Vestas (DK), Siemens Gamesa (DE/ES), GE Renewable Energy (US), Goldwind/Envision (CN), Nordex (DE).",
+      leaders:[{c:"Denmark",v:"Vestas"},{c:"Germany / Spain",v:"Siemens Gamesa"},{c:"USA",v:"GE Renewable"},{c:"China",v:"Goldwind, Envision"}],
+      hubs:[
+        {name:"Aarhus (DK)",coords:[10,56],r:14,detail:{plant:"Vestas HQ + factories",cap:"largest OEM globally",year:"1945"}},
+        {name:"Zamudio (ES) / Hamburg (DE)",coords:[10,53],r:12,detail:{plant:"Siemens Gamesa",cap:"offshore leader",year:"2017 merger"}},
+        {name:"Schenectady (US)",coords:[-74,43],r:10,detail:{plant:"GE Renewable Energy",cap:"Haliade-X 14 MW",year:"2020"}},
+        {name:"Beijing (CN)",coords:[116,40],r:14,detail:{plant:"Goldwind, Envision",cap:"top global by capacity",year:"2010s+"}},
+        {name:"Rostock (DE)",coords:[12,54],r:8,detail:{plant:"Nordex blade plant",cap:"5 MW class",year:"1985"}}
+      ]},
+    downstream: {share:"~20%",
+      desc:"Wind farm development, installation vessels, operations and maintenance. Geographically distributed; offshore installation is technically demanding.",
+      leaders:[{c:"China",v:"≈ 50% installed"},{c:"USA",v:"≈ 10%"},{c:"EU",v:"≈ 22% (incl. UK)"},{c:"India",v:"≈ 5%"},{c:"Brazil",v:"≈ 3%"}],
+      hubs:[
+        {name:"Inner Mongolia (CN)",coords:[111,42],r:18,detail:{plant:"Onshore wind belt",cap:"largest globally",year:"2010+"}},
+        {name:"Texas (US)",coords:[-100,31],r:13,detail:{plant:"Largest US wind state",cap:"~40 GW",year:"2005+"}},
+        {name:"North Sea (UK/DE/NL)",coords:[3,55],r:13,detail:{plant:"Offshore corridor",cap:"~30 GW",year:"ongoing"}},
+        {name:"Gujarat / Tamil Nadu (IN)",coords:[78,21],r:9,detail:{plant:"Onshore wind cluster",cap:"~45 GW",year:"2000+"}},
+        {name:"Northeast Brazil",coords:[-39,-7],r:10,detail:{plant:"Ceará / RN wind belt",cap:"~30 GW",year:"2010+"}}
+      ]}
+  }},
+
+  hydrogen: { name:"Low-carbon hydrogen", stages:{
+    raw: {share:"~5%",
+      desc:"Platinum-group metals (Pt, Ir) for PEM catalysts; Nafion-class perfluorinated membrane materials. South Africa holds the reserves; the membrane IP sits in the US and Japan.",
+      leaders:[{c:"South Africa",v:"≈ 80% Pt, >85% Ir"},{c:"USA",v:"Nafion (DuPont/Chemours)"},{c:"Japan",v:"Toray, AGC"}],
+      hubs:[
+        {name:"Bushveld (ZA)",coords:[28,-25],r:16,detail:{plant:"Anglo American, Sibanye",cap:"world's largest PGM reserves",year:"ongoing"}},
+        {name:"DuPont (US)",coords:[-75.5,39.7],r:11,detail:{plant:"Chemours Nafion",cap:"PEM membrane monopoly",year:"1962"}},
+        {name:"Toray (JP)",coords:[140,36],r:8,detail:{plant:"Membrane materials",cap:"alternative PEM",year:"2000s"}}
+      ]},
+    upstream: {share:"~15%",
+      desc:"Catalyst-coated substrates, diaphragms, gas-diffusion layers. Concentrated among specialty chemical and materials firms.",
+      leaders:[{c:"USA / Japan",v:"membrane materials"},{c:"Belgium",v:"Umicore catalysts"},{c:"Germany",v:"Heraeus catalysts"}],
+      hubs:[
+        {name:"Wilmington (US)",coords:[-75.5,39.7],r:10,detail:{plant:"Chemours Nafion",cap:"global benchmark PEM",year:"1962"}},
+        {name:"Hanau (DE)",coords:[8.9,50.1],r:8,detail:{plant:"Heraeus PGM catalysts",cap:"large refiner",year:"1851"}},
+        {name:"Brussels (BE)",coords:[4.3,50.8],r:7,detail:{plant:"Umicore CCS",cap:"catalysts + recycling",year:"2001"}},
+        {name:"Tokyo (JP)",coords:[140,36],r:7,detail:{plant:"Toray membranes",cap:"PEM alternative",year:"2000s"}}
+      ]},
+    midstream: {share:"~55%",
+      desc:"Electrolyser stacks — alkaline, PEM and SOEC. Patent-dense and capital-intensive. Europe + Japan historically lead; Chinese alkaline manufacturing is scaling fast.",
+      leaders:[{c:"Norway",v:"Nel ASA"},{c:"Germany",v:"Siemens Energy, thyssenkrupp nucera"},{c:"UK",v:"ITM Power"},{c:"China",v:"LONGi Hydrogen"},{c:"Japan",v:"Toshiba SOEC"}],
+      hubs:[
+        {name:"Oslo (NO)",coords:[10.7,59.9],r:11,detail:{plant:"Nel ASA",cap:"PEM + alkaline leader",year:"1927"}},
+        {name:"Sheffield (UK)",coords:[-1.5,53.4],r:9,detail:{plant:"ITM Power",cap:"PEM specialist",year:"2001"}},
+        {name:"Erlangen (DE)",coords:[11,49.6],r:12,detail:{plant:"Siemens Energy Silyzer",cap:"PEM at GW scale",year:"1980s"}},
+        {name:"Dortmund (DE)",coords:[7.5,51.5],r:11,detail:{plant:"thyssenkrupp nucera",cap:"alkaline (supplied Unigel BR)",year:"2014"}},
+        {name:"Xi'an (CN)",coords:[108.9,34.3],r:13,detail:{plant:"LONGi Hydrogen",cap:"3.5 GW alkaline capacity",year:"2021"}},
+        {name:"Yokohama (JP)",coords:[139.6,35.4],r:8,detail:{plant:"Toshiba SOEC",cap:"R&D scale",year:"2010s"}}
+      ]},
+    downstream: {share:"~25%",
+      desc:"Storage, mobility (FCEV), industrial use (ammonia, refining, green steel). Some local integration is possible; the patented electrolyser stack still travels with the project.",
+      leaders:[{c:"Brazil",v:"Unigel ammonia (3×20 MW)"},{c:"EU",v:"hydrogen corridors"},{c:"Saudi Arabia",v:"NEOM project"},{c:"Australia",v:"export-led projects"},{c:"Japan",v:"FCEV (Toyota Mirai)"}],
+      hubs:[
+        {name:"Camaçari (BR)",coords:[-38.3,-12.7],r:9,detail:{plant:"Unigel green-NH₃",cap:"60 kt NH₃/yr (thyssenkrupp stack)",year:"2023"}},
+        {name:"NEOM (SA)",coords:[35,28],r:11,detail:{plant:"Air Products green NH₃",cap:"1.2 Mt NH₃/yr planned",year:"2027"}},
+        {name:"Hamburg / Rotterdam",coords:[7,53],r:10,detail:{plant:"EU H₂ corridor",cap:"import + use",year:"2023+"}},
+        {name:"Pilbara (AU)",coords:[118,-22],r:9,detail:{plant:"Asian Renewable Energy Hub",cap:"export-led",year:"planned"}},
+        {name:"Tokyo (JP)",coords:[140,36],r:8,detail:{plant:"Toyota FCEV ecosystem",cap:"Mirai + buses",year:"2014+"}}
+      ]}
+  }},
+
+  steel: { name:"Green steel / H₂-DRI", stages:{
+    raw: {share:"~18%",
+      desc:"Iron ore (BR, AU dominate), scrap (USA, EU) and hydrogen supply. Iron ore is dispersed; high-grade pellet needed for H₂-DRI is concentrated.",
+      leaders:[{c:"Brazil",v:"Vale iron ore"},{c:"Australia",v:"Rio Tinto, BHP"},{c:"USA",v:"scrap supplier"},{c:"South Africa",v:"Kumba"}],
+      hubs:[
+        {name:"Carajás (BR)",coords:[-50,-6],r:14,detail:{plant:"Vale Carajás",cap:"~150 Mt/yr high-grade",year:"1985+"}},
+        {name:"Pilbara (AU)",coords:[118,-22],r:13,detail:{plant:"Rio Tinto / BHP / FMG",cap:"~900 Mt/yr",year:"1960s+"}},
+        {name:"USA (Midwest)",coords:[-87,40],r:9,detail:{plant:"Scrap recycling network",cap:"~80 Mt/yr",year:"ongoing"}},
+        {name:"Sishen (ZA)",coords:[23,-28],r:7,detail:{plant:"Kumba iron ore",cap:"~40 Mt/yr",year:"1953+"}}
+      ]},
+    upstream: {share:"~30%",
+      desc:"H₂-DRI process IP — MIDREX (US) holds ≈ 60% of the global DRI market; Tenova/Danieli (IT) provide EnergIron; SSAB (SE) leads with HYBRIT; ThyssenKrupp (DE) with SALCOS roadmap.",
+      leaders:[{c:"USA",v:"MIDREX ≈ 60% DRI"},{c:"Italy",v:"Tenova / Danieli (EnergIron)"},{c:"Sweden",v:"SSAB (HYBRIT)"},{c:"Germany",v:"thyssenkrupp (SALCOS)"}],
+      hubs:[
+        {name:"Charlotte (US)",coords:[-80.8,35.2],r:13,detail:{plant:"MIDREX HQ (Kobe Steel JV)",cap:"≈ 60% global DRI",year:"1969"}},
+        {name:"Genoa / Buttrio (IT)",coords:[12.2,46.1],r:10,detail:{plant:"Tenova, Danieli",cap:"EnergIron process",year:"1980s"}},
+        {name:"Luleå (SE)",coords:[22.2,65.6],r:9,detail:{plant:"SSAB HYBRIT",cap:"world's first fossil-free pilot",year:"2021"}},
+        {name:"Duisburg (DE)",coords:[6.8,51.4],r:10,detail:{plant:"thyssenkrupp SALCOS",cap:"H₂-DRI plant under build",year:"2026 (planned)"}}
+      ]},
+    midstream: {share:"~35%",
+      desc:"Integrated mills and EAF steelmaking. POSCO (KR), Nippon Steel (JP), ArcelorMittal (LU), Baowu (CN), thyssenkrupp (DE) dominate steel patents and process know-how.",
+      leaders:[{c:"South Korea",v:"POSCO"},{c:"Japan",v:"Nippon Steel"},{c:"Luxembourg / India",v:"ArcelorMittal"},{c:"China",v:"Baowu (largest globally)"},{c:"Germany",v:"thyssenkrupp"}],
+      hubs:[
+        {name:"Pohang (KR)",coords:[129.4,36.0],r:13,detail:{plant:"POSCO Pohang Works",cap:"world-class integrated mill",year:"1973"}},
+        {name:"Kimitsu (JP)",coords:[140,35.3],r:12,detail:{plant:"Nippon Steel Kimitsu",cap:"large blast-furnace site",year:"1965"}},
+        {name:"Shanghai (CN)",coords:[121.5,31.2],r:14,detail:{plant:"Baowu Steel",cap:"world's largest producer",year:"2016 merger"}},
+        {name:"Luxembourg",coords:[6.1,49.6],r:9,detail:{plant:"ArcelorMittal HQ",cap:"global operations",year:"2006"}},
+        {name:"Duisburg (DE)",coords:[6.8,51.4],r:9,detail:{plant:"thyssenkrupp Steel Europe",cap:"largest EU mill",year:"1999"}}
+      ]},
+    downstream: {share:"~17%",
+      desc:"Rolling, finishing, downstream products (automotive, construction, machinery). Closer to end users; less patent-intensive than process IP upstream.",
+      leaders:[{c:"China",v:"≈ 55% steel use"},{c:"EU + USA",v:"automotive / construction"},{c:"India",v:"construction-led demand"},{c:"Brazil",v:"flat + long products"}],
+      hubs:[
+        {name:"China",coords:[105,35],r:18,detail:{plant:"Largest steel user",cap:"~1 Gt/yr",year:"ongoing"}},
+        {name:"India",coords:[78,22],r:12,detail:{plant:"Construction + auto demand",cap:"~120 Mt/yr",year:"2023"}},
+        {name:"USA",coords:[-95,38],r:11,detail:{plant:"Auto + construction",cap:"~85 Mt/yr",year:"2023"}},
+        {name:"EU",coords:[10,50],r:10,detail:{plant:"Auto + machinery",cap:"~140 Mt/yr",year:"2023"}},
+        {name:"Brazil",coords:[-50,-15],r:8,detail:{plant:"CSN, Gerdau, Usiminas",cap:"~35 Mt/yr",year:"2023"}}
+      ]}
+  }},
+
+  ev: { name:"EVs & green mobility", stages:{
+    raw: {share:"~8%",
+      desc:"Lithium (CL, AU, BO), cobalt (DR Congo), nickel (Indonesia, RU), copper, graphite (CN). Mining dispersed; refining is the choke point.",
+      leaders:[{c:"Chile / Australia",v:"lithium reserves"},{c:"DR Congo",v:"≈ 70% cobalt"},{c:"Indonesia",v:"nickel"},{c:"China",v:"graphite, REE"}],
+      hubs:[
+        {name:"Salar de Atacama (CL)",coords:[-68,-23],r:11,detail:{plant:"SQM, Albemarle",cap:"~40% Li brine",year:"ongoing"}},
+        {name:"Greenbushes (AU)",coords:[116,-34],r:10,detail:{plant:"Tianqi / Albemarle",cap:"largest Li-hard rock mine",year:"1983"}},
+        {name:"Katanga (CD)",coords:[26,-11],r:11,detail:{plant:"Cobalt mining belt",cap:"≈ 70% global cobalt",year:"ongoing"}},
+        {name:"Sulawesi (ID)",coords:[122,-2],r:10,detail:{plant:"Indonesian nickel cluster",cap:"largest Ni producer",year:"2010s+"}},
+        {name:"Inner Mongolia (CN)",coords:[111,42],r:9,detail:{plant:"Graphite + REE",cap:"≈ 65% graphite",year:"ongoing"}}
+      ]},
+    upstream: {share:"~15%",
+      desc:"Refining, cathode/anode active materials, electrolyte salts and separators. China refines most lithium, cobalt and nickel destined for batteries.",
+      leaders:[{c:"China",v:"refining + CAM"},{c:"South Korea",v:"POSCO Future M (CAM)"},{c:"Japan",v:"separators (Asahi Kasei)"}],
+      hubs:[
+        {name:"Hubei / Jiangsu (CN)",coords:[114,30],r:16,detail:{plant:"CAM clusters",cap:"global majority",year:"2015+"}},
+        {name:"Pohang (KR)",coords:[129.4,36.0],r:11,detail:{plant:"POSCO Future M",cap:"CAM + precursor",year:"2019 spin-off"}},
+        {name:"Osaka (JP)",coords:[135.5,34.7],r:8,detail:{plant:"Asahi Kasei separators",cap:"leading globally",year:"1985"}},
+        {name:"Sokcho (KR)",coords:[128.5,38.2],r:7,detail:{plant:"Ecopro BM",cap:"high-Ni CAM",year:"2016"}}
+      ]},
+    midstream: {share:"~55%",
+      desc:"Battery cell manufacturing. CATL + BYD (CN), LG ES + Samsung SDI (KR), Panasonic (JP) and Tesla. Cells are the single most patent-dense segment in the EV chain.",
+      leaders:[{c:"China",v:"CATL + BYD ≈ 55%"},{c:"South Korea",v:"LG ES, Samsung SDI"},{c:"Japan",v:"Panasonic"},{c:"USA",v:"Tesla / Panasonic NV"}],
+      hubs:[
+        {name:"Ningde (CN)",coords:[119.5,26.6],r:18,detail:{plant:"CATL HQ + gigafactory",cap:"~300 GWh/yr+",year:"2011"}},
+        {name:"Shenzhen (CN)",coords:[114,22.5],r:14,detail:{plant:"BYD blade-LFP",cap:"vertically integrated",year:"1995"}},
+        {name:"Cheonan (KR)",coords:[127.1,36.8],r:12,detail:{plant:"LG Energy Solution",cap:"global #2",year:"2020 spin-off"}},
+        {name:"Osaka (JP)",coords:[135.5,34.7],r:10,detail:{plant:"Panasonic cylindrical",cap:"Tesla partnership",year:"1953 (battery)"}},
+        {name:"Sparks NV (US)",coords:[-119.8,39.5],r:10,detail:{plant:"Tesla / Panasonic Gigafactory",cap:"≈ 35 GWh/yr",year:"2016"}}
+      ]},
+    downstream: {share:"~22%",
+      desc:"Vehicle assembly. Distributed across major auto producers; less patent-intensive than the cell, but locks in branding and downstream value.",
+      leaders:[{c:"China",v:"BYD, Geely, Nio, etc."},{c:"Japan / Korea",v:"Toyota, Hyundai"},{c:"Germany",v:"VW, BMW, Mercedes"},{c:"USA",v:"Tesla, GM, Ford"},{c:"Brazil",v:"BYD Camaçari (assembly)"}],
+      hubs:[
+        {name:"Shenzhen (CN)",coords:[114,22.5],r:18,detail:{plant:"BYD Auto",cap:"world's largest NEV maker",year:"2003"}},
+        {name:"Toyota City (JP)",coords:[137.2,35.1],r:13,detail:{plant:"Toyota HQ",cap:"global volumes",year:"1937"}},
+        {name:"Wolfsburg (DE)",coords:[10.8,52.4],r:12,detail:{plant:"Volkswagen HQ",cap:"global volumes",year:"1937"}},
+        {name:"Austin TX (US)",coords:[-97.7,30.3],r:11,detail:{plant:"Tesla Giga Texas",cap:"Model Y / Cybertruck",year:"2022"}},
+        {name:"Camaçari (BR)",coords:[-38.3,-12.7],r:10,detail:{plant:"BYD Camaçari (planned)",cap:"5 GW + 150 k veh/yr 2027",year:"2027 (target)"}}
+      ]}
+  }},
+
+  grid: { name:"Grid modernisation", stages:{
+    raw: {share:"~5%",
+      desc:"Copper, aluminium, silicon for power semiconductors (SiC, GaN), grain-oriented electrical steel and rare-earth permanent magnets.",
+      leaders:[{c:"Chile",v:"copper (Codelco)"},{c:"China",v:"REE, graphite"},{c:"USA / Japan",v:"semiconductor wafers"}],
+      hubs:[
+        {name:"Chuquicamata (CL)",coords:[-69,-22],r:11,detail:{plant:"Codelco copper",cap:"largest open-pit mine",year:"1910+"}},
+        {name:"Inner Mongolia (CN)",coords:[111,42],r:10,detail:{plant:"REE + Si raw",cap:"NdFeB feed",year:"ongoing"}},
+        {name:"USA",coords:[-100,38],r:8,detail:{plant:"Silicon wafer supply",cap:"semiconductor base",year:"ongoing"}}
+      ]},
+    upstream: {share:"~25%",
+      desc:"HVDC components, power semiconductors (SiC, GaN), high-voltage cables, transformer cores. Patent-dense; concentrated among a few specialty firms.",
+      leaders:[{c:"USA",v:"Wolfspeed (SiC)"},{c:"Germany",v:"Infineon"},{c:"Japan",v:"Mitsubishi, Fuji"},{c:"Taiwan",v:"TSMC foundry"}],
+      hubs:[
+        {name:"Durham NC (US)",coords:[-78.9,35.99],r:11,detail:{plant:"Wolfspeed (Cree)",cap:"SiC leader",year:"1987"}},
+        {name:"Munich (DE)",coords:[11.6,48.1],r:11,detail:{plant:"Infineon HQ",cap:"power semis leader",year:"1999"}},
+        {name:"Hsinchu (TW)",coords:[120.97,24.8],r:10,detail:{plant:"TSMC foundry",cap:"global semiconductor supply",year:"1987"}},
+        {name:"Tokyo (JP)",coords:[139.7,35.7],r:9,detail:{plant:"Mitsubishi, Fuji",cap:"IGBT + HVDC components",year:"ongoing"}}
+      ]},
+    midstream: {share:"~45%",
+      desc:"HV transformers, switchgear, SCADA / DERMS software, smart inverters, energy management systems. Hitachi Energy, Siemens Energy, GE, ABB and Chinese national champions.",
+      leaders:[{c:"China",v:"State Grid + Sungrow"},{c:"Switzerland / Sweden",v:"Hitachi Energy (ex-ABB)"},{c:"Germany",v:"Siemens Energy"},{c:"USA",v:"GE Grid Solutions"}],
+      hubs:[
+        {name:"Beijing (CN)",coords:[116.4,39.9],r:16,detail:{plant:"State Grid Corp.",cap:"largest utility globally",year:"2002"}},
+        {name:"Hefei (CN)",coords:[117.3,31.8],r:13,detail:{plant:"Sungrow",cap:"≈ 30% global inverter market",year:"1997"}},
+        {name:"Zurich (CH)",coords:[8.55,47.4],r:11,detail:{plant:"Hitachi Energy HQ",cap:"HVDC leader",year:"2020"}},
+        {name:"Erlangen (DE)",coords:[11.0,49.6],r:11,detail:{plant:"Siemens Energy HQ",cap:"global T&D",year:"1847"}},
+        {name:"Schenectady (US)",coords:[-73.9,42.8],r:9,detail:{plant:"GE Grid Solutions",cap:"global T&D",year:"1892"}}
+      ]},
+    downstream: {share:"~25%",
+      desc:"Grid operators, distribution networks, smart meters, smart cities, EV chargers. Distributed across utilities; software and integration are the contestable openings.",
+      leaders:[{c:"China",v:"State Grid + Southern"},{c:"EU",v:"ENTSO-E TSOs"},{c:"USA",v:"ISOs (PJM, CAISO, ERCOT)"},{c:"Japan",v:"TEPCO etc."},{c:"Brazil",v:"ONS"}],
+      hubs:[
+        {name:"Beijing (CN)",coords:[116.4,39.9],r:18,detail:{plant:"State Grid operations",cap:"largest utility globally",year:"2002"}},
+        {name:"Brussels (BE)",coords:[4.3,50.8],r:12,detail:{plant:"ENTSO-E (TSO assoc.)",cap:"EU grid coord.",year:"2009"}},
+        {name:"Folsom CA (US)",coords:[-121.2,38.7],r:11,detail:{plant:"CAISO",cap:"California ISO",year:"1998"}},
+        {name:"Tokyo (JP)",coords:[139.7,35.7],r:9,detail:{plant:"TEPCO",cap:"largest JP utility",year:"1951"}},
+        {name:"Brasília (BR)",coords:[-47.9,-15.8],r:9,detail:{plant:"ONS",cap:"national grid operator",year:"1998"}}
+      ]}
+  }}
+};
+
+let currentChain = "solar", currentStage = "raw";
+
+// Topojson world load
+d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(world=>{
+  const countries = topojson.feature(world, world.objects.countries);
+  gMap.selectAll("path").data(countries.features).enter().append("path")
+    .attr("class","country dim").attr("d",path)
+    .attr("fill","#1A222E").attr("stroke","#0B0F14").attr("stroke-width",.4);
+  drawChainStage(currentChain, currentStage);
+}).catch(err=>{
+  mapSvg.append("text").attr("x",mapW/2).attr("y",mapH/2).attr("text-anchor","middle")
+    .attr("fill","#A9B3C2").attr("font-size",13)
+    .text("World map could not be loaded — hubs shown without basemap.");
+  drawChainStage(currentChain, currentStage);
+});
+
+function drawChainStage(chainKey, stageKey){
+  const ch = CHAINS[chainKey];
+  if(!ch) return;
+  const st = ch.stages[stageKey];
+  if(!st) return;
+  gHubs.selectAll("*").transition().duration(220).style("opacity",0).remove();
+  gFlows.selectAll("*").transition().duration(220).style("opacity",0).remove();
+  setTimeout(()=>{
+    const hubs = gHubs.selectAll("g.hubg").data(st.hubs).enter().append("g").attr("class","hubg");
+    hubs.append("circle").attr("class","hub hub-target")
+      .attr("cx",d=>projection(d.coords)[0]).attr("cy",d=>projection(d.coords)[1])
+      .attr("r",0).attr("fill","#F0B429").attr("stroke","#0B0F14").attr("stroke-width",1.5).attr("opacity",.85)
+      .on("mousemove touchstart click", function(ev,d){
+        ev.stopPropagation();
+        const tip = document.getElementById("mapTooltip");
+        tip.innerHTML = `<div class="ttl">${d.name}</div>
+          <div class="row"><span>Plant / cluster</span><b>${d.detail.plant}</b></div>
+          <div class="row"><span>Capacity</span><b>${d.detail.cap}</b></div>
+          <div class="row"><span>Reference</span><b>${d.detail.year}</b></div>`;
+        const rect = document.querySelector(".map-frame").getBoundingClientRect();
+        const px = (ev.touches ? ev.touches[0].clientX : ev.clientX) - rect.left + 12;
+        const py = (ev.touches ? ev.touches[0].clientY : ev.clientY) - rect.top + 12;
+        const tipW = 260, tipH = 120;
+        tip.style.left = Math.max(8, Math.min(rect.width - tipW - 8, px)) + "px";
+        tip.style.top  = Math.max(8, Math.min(rect.height - tipH - 8, py)) + "px";
+        tip.classList.add("show");
+      })
+      .on("mouseleave", ()=> document.getElementById("mapTooltip").classList.remove("show"))
+      .transition().delay((d,i)=>i*70).duration(500).attr("r",d=>d.r);
+
+    hubs.append("circle")
+      .attr("cx",d=>projection(d.coords)[0]).attr("cy",d=>projection(d.coords)[1])
+      .attr("r",0).attr("fill","none").attr("stroke","#F0B429").attr("stroke-width",1).attr("opacity",.25)
+      .transition().delay((d,i)=>i*70+200).duration(900).attr("r",d=>d.r*2.2).attr("opacity",0);
+
+    hubs.append("text").attr("class","hub-label")
+      .attr("x",d=>projection(d.coords)[0]+d.r+5).attr("y",d=>projection(d.coords)[1]+4)
+      .text(d=>d.name).style("opacity",0)
+      .transition().delay((d,i)=>i*70+400).duration(400).style("opacity",1);
+
+    // Panel update
+    const STAGE_LABELS = {raw:"Raw materials", upstream:"Upstream", midstream:"Midstream", downstream:"Downstream"};
+    const p = document.getElementById("gisPanel");
+    p.innerHTML = `
+      <div class="stage-title">${ch.name} · ${STAGE_LABELS[stageKey]}</div>
+      <div class="share-cap">Share of chain value</div>
+      <div class="stage-share">${st.share}</div>
+      <p class="desc">${st.desc}</p>
+      <div class="leaders">
+        ${st.leaders.map(l=>`<div><span>${l.c}</span><span>${l.v}</span></div>`).join("")}
+      </div>
+    `;
+  }, 240);
+}
+
+// Chain × stage button handlers
+document.querySelectorAll('#chainSelector .row.chains button').forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll('#chainSelector .row.chains button').forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    currentChain = b.dataset.chain;
+    drawChainStage(currentChain, currentStage);
+  });
+});
+document.querySelectorAll('#chainSelector .row.stages button').forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll('#chainSelector .row.stages button').forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    currentStage = b.dataset.stage;
+    drawChainStage(currentChain, currentStage);
+  });
+});
+
+// Mobile: tap outside a hub hides the map tooltip; scroll also hides it
+function hideMapTip(){ const t=document.getElementById("mapTooltip"); if(t) t.classList.remove("show"); }
+document.addEventListener("click", (ev)=>{
+  if(!ev.target.closest(".hub-target")) hideMapTip();
+}, {passive:true});
+window.addEventListener("scroll", hideMapTip, {passive:true});
+
+/* ===================== Top progress + nav ===================== */
+window.addEventListener("scroll",()=>{
+  const h=document.documentElement.scrollHeight - window.innerHeight;
+  const p=window.scrollY/h*100;
+  document.getElementById("progBar").style.width = p+"%";
+}, {passive:true});
+
+document.querySelectorAll(".topnav [data-jump]").forEach(a=>{
+  a.addEventListener("click",()=>{
+    const t = document.getElementById(a.dataset.jump);
+    if(t) t.scrollIntoView({behavior:"smooth"});
+  });
+});
+
+// highlight nav based on visible section
+const sections = ["hero","s1","s2","s3","coda","methods"];
+const navItems = Array.from(document.querySelectorAll(".topnav [data-jump]"));
+const navObs = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const id = e.target.id;
+      navItems.forEach(n=>n.classList.toggle("active", n.dataset.jump===id));
+    }
+  });
+},{threshold:.35});
+sections.forEach(id=>{ const el=document.getElementById(id); if(el) navObs.observe(el); });
+
+/* ===================== Hero SVG art (procedural "patent walls") ===================== */
+(function drawHeroArt(){
+  const svg = d3.select("#heroArt");
+  const W=1600, H=900;
+  // soft grid
+  const gridG = svg.append("g");
+  for(let x=0; x<=W; x+=80) gridG.append("line").attr("class","grid-line").attr("x1",x).attr("x2",x).attr("y1",0).attr("y2",H);
+  for(let y=0; y<=H; y+=80) gridG.append("line").attr("class","grid-line").attr("x1",0).attr("x2",W).attr("y1",y).attr("y2",y);
+
+  // pillars / patent walls — heights based on a synthetic distribution
+  const N=46, baseY=H-60;
+  const heights = d3.range(N).map((i)=>{
+    // power-law-ish curve with two peaks (mimicking concentration)
+    const skew = Math.pow(Math.abs(i-N*0.30)/(N*0.6), 1.4);
+    const noise = (Math.sin(i*0.7)+Math.cos(i*1.3))*40;
+    return Math.max(60, 520 * (1-skew) + noise + 60);
+  });
+  const pillarW = (W-160)/N;
+
+  heights.forEach((h,i)=>{
+    const x = 80 + i*pillarW;
+    let cls = "wall-bar";
+    if(i<=2 || (i>3 && i<7)) cls="wall-bar hot";
+    else if(i>=8 && i<=12) cls="wall-bar gold";
+    svg.append("rect").attr("class",cls)
+      .attr("x",x).attr("y",baseY-h)
+      .attr("width",pillarW-6).attr("height",h)
+      .attr("rx",1);
+    // tiny ticks at the top
+    if(i%3===0){
+      svg.append("line").attr("class","grid-line")
+        .attr("x1",x).attr("x2",x+pillarW-6)
+        .attr("y1",baseY-h-4).attr("y2",baseY-h-4)
+        .attr("stroke","rgba(241,232,217,.15)");
+    }
+  });
+
+  // signal dots and rings — represent "patents lighting up"
+  const signals = [
+    [180, 240], [340, 180], [510, 290], [720, 160], [990, 220],
+    [1180, 280], [1380, 200], [1490, 320]
+  ];
+  signals.forEach((p,i)=>{
+    svg.append("circle").attr("class","signal").attr("cx",p[0]).attr("cy",p[1]).attr("r",3);
+    const ring = svg.append("circle").attr("class","signal-ring").attr("cx",p[0]).attr("cy",p[1]).attr("r",3);
+    function pulse(){
+      ring.transition().duration(2200).ease(d3.easeCubicOut).attr("r",30).attr("opacity",0)
+        .on("end",()=>{ ring.attr("r",3).attr("opacity",.4); pulse(); });
+    }
+    setTimeout(pulse, i*350);
+  });
+
+  // horizon line
+  svg.append("line").attr("x1",0).attr("x2",W).attr("y1",baseY).attr("y2",baseY)
+    .attr("stroke","rgba(241,232,217,.18)").attr("stroke-width",.8);
+})();
+
+/* ===================== Section dividers ===================== */
+function renderDivider(id){
+  const svg = d3.select("#"+id);
+  if(svg.empty()) return;
+  const W=1600, H=140, n=38;
+  // small horizontal "patent skyline"
+  const hg = d3.range(n).map(i=> 30 + 70*Math.sin(i*0.9) + 30*Math.cos(i*1.7));
+  const w=(W-100)/n;
+  hg.forEach((h,i)=>{
+    const x=50+i*w; const v=Math.abs(h);
+    const c = i%9===0 ? "pillar hot" : (i%6===0 ? "pillar amber" : "pillar");
+    svg.append("rect").attr("class",c).attr("x",x).attr("y",H-v-10).attr("width",w-4).attr("height",v).attr("rx",1);
+  });
+  svg.append("line").attr("class","line").attr("x1",0).attr("x2",W).attr("y1",H-10).attr("y2",H-10);
+}
+renderDivider("div1");
+renderDivider("div2");
+
+
+
+/* ============= Coda tabs ===================================================== */
+const CODA = {
+  solar: { title:"Solar PV", body:`<h4>Solar PV · the locked midstream and the contestable BoS</h4>
+    <p>Solar PV is the most extreme case in the corpus: ≈ 85% of cells and modules and ≈ 96% of wafers from one Chinese cluster, with patents that follow. <strong>The midstream is effectively locked</strong>; the most defensible entry points for developing countries are <em>downstream</em> (EPC, O&amp;M, inverters as a less concentrated midstream sub-segment) and selected balance-of-system components.</p>
+    <p>Policy instruments that travel well: local-content financing tied to module assembly, public procurement for projects, inverter localisation pathways, and grid-side capacity building.</p>` },
+  wind: { title:"Wind energy", body:`<h4>Wind energy · tower fabrication and EPC as entry points</h4>
+    <p>Wind patents concentrate in Europe (Vestas, Siemens Gamesa, Nordex) and China (Goldwind, Envision), with Denmark punching above its size. The midstream is patent-dense around nacelles and blades. <strong>Tower fabrication, balance-of-plant components and installation/O&amp;M are realistic entry segments</strong>; offshore installation is technically demanding but commercially attractive.</p>
+    <p>Policy instruments: regional supply-chain coordination for tower steel; concessional finance for installation vessels; standards harmonisation for grid codes.</p>` },
+  hydrogen: { title:"Low-carbon hydrogen", body:`<h4>Low-carbon hydrogen · the membrane and the application</h4>
+    <p>Patent concentration is sharpest around two narrow segments: <strong>PEM membranes</strong> (DuPont/Chemours and Toray) and electrolyser stacks (Nel, Siemens, thyssenkrupp, ITM, increasingly LONGi). Reserves of platinum-group metals sit overwhelmingly in South Africa, but the IP that turns them into electrolysers does not. <strong>The contestable openings are at the application stages</strong> — green ammonia (Brazil's Unigel is a working example), green steel, refining, mobility — and at alkaline stack assembly where IP is less restrictive than PEM.</p>
+    <p>Policy instruments: technology-pull demand creation (ammonia, refining), targeted public R&amp;D for alkaline pathways, capacity building for system integration.</p>` },
+  steel: { title:"Green steel / H₂-DRI", body:`<h4>Green steel · the DRI shaft furnace and the downstream mill</h4>
+    <p>MIDREX (US) controls ≈ 60% of the global DRI market; Tenova/Danieli (IT), SSAB (SE) and thyssenkrupp (DE) lead the alternative routes. <strong>The H₂-DRI process IP is locked; the downstream mill is not</strong>. Brazil, India and South Africa hold significant iron-ore resources; the policy challenge is to retain more value before the ore leaves.</p>
+    <p>Policy instruments: licensing partnerships with MIDREX or Tenova; long-term offtake to anchor pilots (Brazil and India have the demand to do this); public procurement of green steel for infrastructure.</p>` },
+  ev: { title:"EVs & green mobility", body:`<h4>EVs &amp; mobility · the cell wall and the vehicle floor</h4>
+    <p>Battery cells are the densest patent cluster in the entire green-tech landscape — CATL, BYD, LG ES, Samsung SDI and Panasonic between them hold the majority. <strong>Cells are not contestable in the short run; vehicle assembly is.</strong> Brazil (BYD Camaçari, Stellantis Bio-Hybrid) and Indonesia (with nickel as leverage) illustrate two different access routes.</p>
+    <p>Policy instruments: assembly-led MOUs that tie investment to local content over time, anchor public-fleet procurement (electric buses, government cars), critical-mineral processing partnerships (nickel, lithium).</p>` },
+  grid: { title:"Grid modernisation", body:`<h4>Grid modernisation · the high-voltage core and the smart-distribution edge</h4>
+    <p>The high-voltage core — HVDC components, large transformers, switchgear — is concentrated among Hitachi Energy, Siemens Energy, GE and Chinese national champions. <strong>The contestable openings are at the distribution edge</strong>: smart inverters, BESS integration, DERMS software, smart meters, EV-charging infrastructure. China's State Grid scale is its own anomaly; for developing countries the realistic terrain is distribution-level integration and software.</p>
+    <p>Policy instruments: technology transfer agreements for HV substations; software/data partnerships for DERMS; standards-setting in smart-meter interoperability.</p>` }
+};
+// Stage value-share % and patent-intensity (control %) per chain — used for the coda mini-chart.
+const CODA_STAGE = {
+  solar:    { upstream:{share:12, control:92}, midstream:{share:55, control:78}, downstream:{share:30, control:32} },
+  wind:     { upstream:{share:20, control:70}, midstream:{share:52, control:85}, downstream:{share:20, control:45} },
+  hydrogen: { upstream:{share:15, control:88}, midstream:{share:55, control:95}, downstream:{share:25, control:62} },
+  steel:    { upstream:{share:30, control:80}, midstream:{share:35, control:75}, downstream:{share:17, control:40} },
+  ev:       { upstream:{share:15, control:72}, midstream:{share:55, control:95}, downstream:{share:22, control:55} },
+  grid:     { upstream:{share:25, control:78}, midstream:{share:45, control:80}, downstream:{share:25, control:50} }
+};
+
+/* ============= Coda — value-flow sankey per chain ===========================
+   Stage shares from CODA_STAGE; within-stage country distributions derived from
+   the chain cards + dashboard v5 + IEA/IRENA/Mission Possible Partnership.
+   Each chain is rebuilt on tab change with a soft fade transition. */
+const STAGE_LABEL_FULL = {
+  solar:{upstream:"Upstream · polysilicon, ingots, wafers", midstream:"Midstream · cells, modules, inverters", downstream:"Downstream · EPC, O&M, integration"},
+  wind:{upstream:"Upstream · bearings, gearboxes, forgings", midstream:"Midstream · turbines, blades, towers", downstream:"Downstream · development, installation, O&M"},
+  hydrogen:{upstream:"Upstream · PGM, membranes, catalysts", midstream:"Midstream · electrolyser stacks", downstream:"Downstream · ammonia, mobility, industrial use"},
+  steel:{upstream:"Upstream · iron ore + DRI process", midstream:"Midstream · steelmaking + finishing", downstream:"Downstream · rolling + applications"},
+  ev:{upstream:"Upstream · minerals + CAM/anode", midstream:"Midstream · battery cells + packs", downstream:"Downstream · vehicle assembly"},
+  grid:{upstream:"Upstream · power semis + HV cables", midstream:"Midstream · T&D equipment + SCADA", downstream:"Downstream · operations + smart edge"}
+};
+
+// 6 chains × 3 stages × 7 country groupings. Values are within-stage % (rows sum to ~100).
+// Country groupings: China, Europe (EU + UK + CH), United States, S. Korea / Japan,
+// SE Asia (VN, MY, TH, ID), India / Brazil / S. Africa, Rest of world.
+const SANKEY_MATRIX = {
+  solar: {
+    upstream:   {CN:80, EU: 8, US: 3, JPKR: 4, SEA: 2, IBZ: 1, ROW: 2},
+    midstream:  {CN:85, EU: 1, US: 3, JPKR: 3, SEA: 7, IBZ: 0.5, ROW:0.5},
+    downstream: {CN:35, EU:15, US:15, JPKR: 7, SEA: 3, IBZ:17, ROW: 8},
+  },
+  wind: {
+    upstream:   {CN:35, EU:30, US: 8, JPKR:20, SEA: 0, IBZ: 0, ROW: 7},
+    midstream:  {CN:30, EU:45, US:12, JPKR: 5, SEA: 0, IBZ: 5, ROW: 3},
+    downstream: {CN:40, EU:25, US:12, JPKR: 5, SEA: 0, IBZ:12, ROW: 6},
+  },
+  hydrogen: {
+    upstream:   {CN: 5, EU:20, US:25, JPKR:15, SEA: 0, IBZ:35, ROW: 0},
+    midstream:  {CN:10, EU:50, US:15, JPKR:22, SEA: 0, IBZ: 0, ROW: 3},
+    downstream: {CN: 8, EU:30, US:15, JPKR:25, SEA: 0, IBZ:10, ROW:12},
+  },
+  steel: {
+    upstream:   {CN: 5, EU:20, US:25, JPKR:10, SEA: 0, IBZ:25, ROW:15},
+    midstream:  {CN:30, EU:20, US: 8, JPKR:33, SEA: 0, IBZ: 5, ROW: 4},
+    downstream: {CN:40, EU:15, US:12, JPKR:10, SEA: 0, IBZ:15, ROW: 8},
+  },
+  ev: {
+    upstream:   {CN:25, EU: 5, US:10, JPKR:23, SEA:20, IBZ: 5, ROW:12},
+    midstream:  {CN:55, EU: 3, US: 5, JPKR:37, SEA: 0, IBZ: 0, ROW: 0},
+    downstream: {CN:35, EU:18, US:12, JPKR:28, SEA: 0, IBZ: 5, ROW: 2},
+  },
+  grid: {
+    upstream:   {CN:12, EU:40, US:22, JPKR:18, SEA: 0, IBZ: 0, ROW: 8},
+    midstream:  {CN:30, EU:30, US:15, JPKR:12, SEA: 0, IBZ: 0, ROW:13},
+    downstream: {CN:35, EU:22, US:18, JPKR: 8, SEA: 0, IBZ: 6, ROW:11},
+  }
+};
+
+const SANKEY_COUNTRY_LABEL = {
+  CN:"China", EU:"Europe", US:"United States", JPKR:"S. Korea / Japan",
+  SEA:"SE Asia", IBZ:"India / Brazil / S. Africa", ROW:"Rest of world"
+};
+const SANKEY_COUNTRY_COL = {
+  CN:"#E94E3B", EU:"#F0B429", US:"#6CB6FF", JPKR:"#39B383",
+  SEA:"#B084CC", IBZ:"#9DD3A8", ROW:"#8595A7"
+};
+
+function renderCodaChart(key){
+  // Returns a container div; the actual sankey is drawn after the DOM is updated.
+  return `
+    <div class="coda-chart coda-sankey-wrap">
+      <div class="chart-title">Where the value lands · ${CHAIN_CARDS[key]?.name || key} · stage → country</div>
+      <svg id="codaSankeySvg" viewBox="0 0 1100 460" preserveAspectRatio="xMidYMid meet" role="img"
+           aria-label="Sankey diagram of stage-to-country value flow for ${CHAIN_CARDS[key]?.name || key}."></svg>
+      <div class="coda-sankey-legend">
+        ${Object.keys(SANKEY_COUNTRY_LABEL).map(c=>`<span><span class="chip" style="background:${SANKEY_COUNTRY_COL[c]}"></span>${SANKEY_COUNTRY_LABEL[c]}</span>`).join("")}
+      </div>
+    </div>`;
+}
+
+function drawCodaSankey(key){
+  const svg = d3.select("#codaSankeySvg");
+  if(svg.empty()) return;
+  svg.selectAll("*").remove();
+  const W=1100, H=460, margin={t:30,r:160,b:20,l:240};
+  const stageValues = CODA_STAGE[key];
+  const matrix = SANKEY_MATRIX[key];
+  if(!stageValues || !matrix) return;
+  const stages = ["upstream","midstream","downstream"];
+  const countries = Object.keys(SANKEY_COUNTRY_LABEL);
+
+  const stageNodes = stages.map(s=>({name: STAGE_LABEL_FULL[key][s], group:"stage", _key:s, share: stageValues[s].share}));
+  const countryNodes = countries.map(c=>({name: SANKEY_COUNTRY_LABEL[c], group:"country", _key:c}));
+  const nodes = stageNodes.concat(countryNodes);
+  const idx = name => nodes.findIndex(n=>n.name===name);
+
+  const links = [];
+  stages.forEach(s=>{
+    const stageShare = stageValues[s].share;
+    countries.forEach(c=>{
+      const pct = matrix[s][c] || 0;
+      if(pct>0){
+        const v = stageShare * pct / 100;
+        links.push({source: idx(STAGE_LABEL_FULL[key][s]), target: idx(SANKEY_COUNTRY_LABEL[c]), value: v, country: c});
+      }
+    });
+  });
+
+  const sk = d3.sankey().nodeWidth(16).nodePadding(14)
+    .extent([[margin.l, margin.t], [W-margin.r, H-margin.b]]);
+  const graph = sk({nodes: nodes.map(d=>({...d})), links: links.map(d=>({...d}))});
+
+  const defs = svg.append("defs");
+  graph.links.forEach((l,i)=>{
+    const id = "cg"+i;
+    const g = defs.append("linearGradient").attr("id",id).attr("gradientUnits","userSpaceOnUse")
+      .attr("x1",l.source.x1).attr("x2",l.target.x0);
+    g.append("stop").attr("offset","0%").attr("stop-color","#3F4A5C").attr("stop-opacity",.4);
+    g.append("stop").attr("offset","100%").attr("stop-color", SANKEY_COUNTRY_COL[l.country] || "#888").attr("stop-opacity",.85);
+  });
+
+  // links (drawn first, behind nodes)
+  const linkSel = svg.append("g").selectAll("path").data(graph.links).enter().append("path")
+    .attr("d", d3.sankeyLinkHorizontal())
+    .attr("fill","none").attr("stroke",(d,i)=>"url(#cg"+i+")")
+    .attr("stroke-width", d=>Math.max(1, d.width))
+    .attr("opacity",0)
+    .style("mix-blend-mode","screen");
+  linkSel.transition().delay((d,i)=>i*15).duration(700).attr("opacity",.55);
+  linkSel.append("title").text(d=>`${d.source.name} → ${d.target.name}\n${d.value.toFixed(2)}% of chain value`);
+
+  // nodes
+  const node = svg.append("g").selectAll("g").data(graph.nodes).enter().append("g");
+  node.append("rect")
+    .attr("x",d=>d.x0).attr("y",d=>d.y0)
+    .attr("width",d=>d.x1-d.x0).attr("height",d=>Math.max(2,d.y1-d.y0))
+    .attr("fill", d=> d.group==="country" ? (SANKEY_COUNTRY_COL[d._key] || "#888") : "#F1E8D9")
+    .attr("opacity",0)
+    .transition().duration(550).attr("opacity",d=> d.group==="country" ? .9 : .85);
+
+  node.append("text")
+    .attr("x", d=> d.x0 < W/2 ? d.x0-8 : d.x1+8)
+    .attr("y", d=>(d.y0+d.y1)/2)
+    .attr("dy","0.32em")
+    .attr("text-anchor", d=> d.x0 < W/2 ? "end" : "start")
+    .attr("font-family","Inter,sans-serif").attr("font-size",11.5).attr("font-weight",600)
+    .attr("fill","#F1E8D9")
+    .text(d=>d.name)
+    .style("opacity",0).transition().delay(280).duration(450).style("opacity",1);
+
+  // stage share annotation (yellow, above each stage node)
+  graph.nodes.filter(d=>d.group==="stage").forEach(d=>{
+    svg.append("text")
+      .attr("x",d.x0-8).attr("y",d.y0-6)
+      .attr("text-anchor","end")
+      .attr("fill","#F0B429").attr("font-family","Inter,sans-serif")
+      .attr("font-size",10).attr("font-weight",700).attr("letter-spacing","1")
+      .text(d.share+"% of chain value")
+      .style("opacity",0).transition().delay(360).duration(450).style("opacity",1);
+  });
+}
+
+// Hook the sankey draw into the existing renderCoda
+const _origRenderCoda = (typeof renderCoda === "function") ? renderCoda : null;
+
+function renderCoda(key){
+  const c = CODA[key]; if(!c) return;
+  const target = document.getElementById("codaContent");
+  // soft fade-out → swap → fade-in + redraw sankey
+  target.style.transition = "opacity .25s ease";
+  target.style.opacity = "0";
+  setTimeout(()=>{
+    target.innerHTML = renderCodaChart(key) + c.body;
+    drawCodaSankey(key);
+    target.style.opacity = "1";
+  }, 200);
+  document.querySelectorAll('#codaTabs button').forEach(b=>b.classList.toggle('active', b.dataset.coda===key));
+}
+document.querySelectorAll('#codaTabs button').forEach(b=>{
+  b.addEventListener("click", ()=> renderCoda(b.dataset.coda));
+});
+renderCoda("solar");
+</script>
+
+</body>
+</html>
